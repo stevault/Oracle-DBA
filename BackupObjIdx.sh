@@ -16,20 +16,6 @@ shift; shift
 
 DROP=N
 MV=N
-
-<<<<<<< HEAD
-if [ $# -ge 1 ]; then
-
-    for opt in $*
-    do
-       case $opt in 
-         -d) DROP=Y ;;
-         -mv) MV=Y ;;
-	  *) echo "I don't recognize option $opt"; exit 2;;
-       esac
-    done
-fi
-=======
 DB=$ORACLE_SID
 
 ######################################################
@@ -49,7 +35,6 @@ while [ $# -ge 1 ];do
 done
 
 ######################################################
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 [ "$DROP" = "Y" ] && echo "DROP `echo $TYPE | sed 's;_; ;'` ${OWNER}.${NAME} ;"
 [ "$MV" = "Y" ] && SKIP_PK="index_name not like 'I_SNAP%'" || SKIP_PK="1=1"
@@ -72,11 +57,7 @@ select dbms_metadata.get_ddl('INDEX',i.index_name,i.owner) x
    and $SKIP_PK
    and table_name = '$NAME';
 
-<<<<<<< HEAD
-" | sqlplus -s '/ as sysdba'
-=======
 " | sqlplus -s $SYSCONN@$DB
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 retcode=$?
 exit $retcode

@@ -1,10 +1,7 @@
 #!/bin/ksh
 
-<<<<<<< HEAD
-=======
 DB=$ORACLE_SID
 
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 if [ $# -lt 3 ]; then
   echo "ERROR:  Missing parameters."
   echo "SYNTAX: $0 <owner> <name> <object type> [ option(s) ]"
@@ -18,10 +15,7 @@ fi
 OWNER=`echo $1 | awk '{ printf(toupper($1)) }'`
 NAME=`echo $2 | awk '{ printf(toupper($1)) }'`
 TYPE=`echo $3 | awk '{ printf(toupper($1)) }'`
-<<<<<<< HEAD
 BACKUPFILE=bak/${OWNER}_${NAME}.sql
-=======
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 shift; shift; shift
 
 DROP=N
@@ -40,50 +34,35 @@ do
          -o) OVERWRITE=Y ;;
          -v) DISPLAY=Y ;;
          -f) BACKUPFILE=$1 ; shift ;;
-<<<<<<< HEAD
-         -d) DROP=Y ;;
-=======
       -drop) DROP=Y ;;
          -d) DB=$1 ; shift ;;
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 	  *) echo "I don't recognize option $opt"; exit 2;;
        esac
 
 done
 
-<<<<<<< HEAD
-=======
 BACKUPFILE=bak/${OWNER}_${NAME}_${DB}.sql
 
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 [ "$OVERWRITE" = "Y" ] && rm -f $BACKUPFILE
 
 if [ -f $BACKUPFILE ]; then
 
    echo "$BACKUPFILE exists... overwrite?\c"
    read yorn
-<<<<<<< HEAD
-   if [ "$yorn" != "y" -a "$yorn" != "Y" ]; then
-=======
    if [ "$yorn" = "y" -o "$yorn" = "Y" ]; then
       OVERWRITE=Y
    else
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
       echo "will not overwrite $BACKUPFILE"
       exit 0
    fi
 fi
 
-<<<<<<< HEAD
-[ "$DROP" = "Y" ] && echo "DROP `echo $TYPE | sed 's;_; ;'` ${OWNER}.${NAME} ;" >> $BACKUPFILE
-=======
 case $TYPE in
      "DB_LINK") Type="DATABASE LINK";;
              *) Type="$TYPE" ;;
 esac
 
 [ "$DROP" = "Y" ] && echo "DROP `echo $Type | sed 's;_; ;'` ${OWNER}.${NAME} ;" >> $BACKUPFILE
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 echo "
 
@@ -113,11 +92,7 @@ end;
 /
 
 
-<<<<<<< HEAD
-" | sqlplus -s '/ as sysdba' >> $BACKUPFILE
-=======
 " | sqlplus -s $SYSCONN@$DB >> $BACKUPFILE
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 retcode=$?
 
