@@ -1,0 +1,92 @@
+
+DB=$ORACLE_SID
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameter - index_name."
+   exit 2
+fi
+
+OBJECT=$1
+shift
+
+############################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+############################################################
+echo "
+set feedback off
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+col owner format a13
+col index_name format a30
+col segment_name format a30
+col column_name format a40
+
+compute sum of mb on report
+break on report
+
+ttitle center 'TABLE INFO'  skip 2
+ select 
+ t.OWNER,
+ t.table_NAME,
+ t.index_NAME,
+ decode(UNIQUENESS,'NONUNIQUE','N','Y') Unq,
+ o.created,
+ t.TABLESPACE_NAME,
+ t.STATUS,
+ t.logging,
+ t.last_analyzed,
+ LEAF_BLOCKS, DISTINCT_KEYS, NUM_ROWS 
+   from dba_indexes t, dba_objects o
+  where index_name = upper('$OBJECT')
+    and t.owner = o.owner
+    and t.index_name = o.object_name
+    and o.object_type = 'INDEX' ;
+
+ttitle center 'TABLE INFO'  skip 2
+ select 
+ owner,
+ SEGMENT_NAME,
+ PARTITION_NAME,
+ TABLESPACE_NAME,
+ bytes/1024/1024 MB
+   from dba_segments
+  where segment_name = upper('$OBJECT');
+
+ttitle center 'INDEXED COLUMNS'  skip 2
+ select index_name, column_position, column_name
+   from dba_ind_columns c
+  where index_name = upper('$OBJECT')
+ order by c.index_owner ,c.index_name, c.column_position, c.column_name;
+
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+
+
+
+
+
+
+
+
+
+
+
+if [ $# -lt 1 ]; then
+   exit 1
+fi
+
+OBJECT=$1
+
+$ORACLE_HOME/bin/sqlplus -s '/ as sysdba' << EOF

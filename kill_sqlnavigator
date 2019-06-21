@@ -1,0 +1,71 @@
+
+DB=$ORACLE_SID
+DAYS=2
+BASE=`basename $0 .sh`
+CURTIME=`date '+%Y%m%d%H%M%S'`
+SQL=/var/tmp/${BASE}_${CURTIME}.sql
+SHOW=N
+
+##################################################################################
+while [ $# -ge 1 ]; do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -days) DAYS=$1; shift ;;
+  -show) SHOW='Y';;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+
+##################################################################################
+
+build_sql () {
+
+echo "
+
+set serveroutput on feedback off linesize 200
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+BEGIN
+
+ dbms_output.put_line('REM $DB');
+ dbms_output.put_line('set serveroutput on ');
+
+ for SQLNAV_SESSION in (
+ select sid, serial#,
+	USERNAME, SCHEMANAME, OSUSER, MACHINE, STATUS, logon_time
+   from v\$session
+  where program = 'sqlnavigator.exe'
+    and logon_time <= trunc(sysdate)-$DAYS 
+    and status != 'KILLED'
+  order by logon_time asc ) loop
+
+    dbms_output.put_line('prompt killing sqlnavigator session for ' || SQLNAV_SESSION.osuser
+			 || ', logged in as ' || SQLNAV_SESSION.username
+			 || ' since ' || SQLNAV_SESSION.logon_time  );
+    dbms_output.put_line('alter system kill session ''' || SQLNAV_SESSION.sid || ',' || SQLNAV_SESSION.serial# || ''';');
+
+ end loop;
+
+end;
+/
+
+
+" | sqlplus -s $SYSCONN@$DB > $SQL
+
+}
+
+build_sql
+if [ $SHOW = 'Y' ]; then
+   cat $SQL 
+else
+   cat $SQL | sqlplus -s $SYSCONN@$DB
+fi
+
+

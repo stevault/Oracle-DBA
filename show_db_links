@@ -1,0 +1,68 @@
+DB=$ORACLE_SID
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -conn) SYSCONN=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+
+echo "
+
+set feedback off
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+set feedback 10
+
+
+ select 
+ OWNER,
+ DB_LINK,
+ USERNAME,
+ HOST,
+ CREATED
+   from dba_db_links
+  order by db_link
+
+" >/dev/null
+
+
+echo "
+
+set feedback off
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+set feedback 10
+
+
+col owner format a20
+col db_link format a40
+col db_link format a35
+COL USERNAME FORMAT A20 HEADING "CON_USER"
+COL PASSWORD FORMAT A20 HEADING "CON_PWD"
+COL AUTHUSR FORMAT A20 HEADING "AUTH_USER"
+COL AUTHPWD FORMAT A20 HEADING "AUTH_PWD"
+COL HOST FORMAT A30 HEADING "SERVICE"
+
+ SELECT DISTINCT d.OWNER,d.DB_LINK,d.USERNAME,l.PASSWORD,
+	l.AUTHUSR,l.AUTHPWD,d.HOST,d.CREATED
+   FROM DBA_DB_LINKS d, SYS.LINK\$ l
+  where d.USERNAME = l.USERID
+    and d.db_link = l.name
+  order by d.db_link
+/
+
+
+" | $ORACLE_HOME/bin/sqlplus -s ${SYSCONN}@$DB as sysdba
+

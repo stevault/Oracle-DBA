@@ -1,0 +1,5 @@
+DB=$ORACLE_SID
+
+
+echo "describe $1 " | sqlplus -s $SYSCONN@$DB
+

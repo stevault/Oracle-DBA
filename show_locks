@@ -1,0 +1,45 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+set lines 300
+col object_name format a45
+col object_type format a15
+col osuser format a20
+col machine format a30
+
+select 
+   a.inst_id, c.owner, 
+   c.object_name, 
+   c.object_type, 
+   b.sid, 
+   b.serial#, 
+   b.status, 
+   b.osuser, 
+   b.machine 
+from 
+   gv\$locked_object a , 
+   gv\$session b, 
+   dba_objects c 
+where 
+   b.sid = a.session_id 
+and 
+   a.object_id = c.object_id
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

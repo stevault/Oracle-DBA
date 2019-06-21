@@ -1,0 +1,78 @@
+#!/bin/ksh
+
+DB=$ORACLE_SID
+THRESHOLD=25
+SQL=/var/tmp/`basename $0 .bat`.sql
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+     -t) THRESHOLD=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+
+echo -e "
+whenever sqlerror exit sql.sqlcode
+
+set feed off ver off numw 8
+
+select   DB_NAME
+        ,round(a.PERCENT_SPACE_USED,2) PERCENT_SPACE_USED
+        ,round(b.value/1024/1024) RECO_SIZE_MB
+        ,a.NUMBER_OF_FILES
+        ,(case
+         when a.PERCENT_SPACE_USED > 75 then 'CRITICAL'
+         when a.PERCENT_SPACE_USED between 50 and 75 then 'WARNING'
+         when a.PERCENT_SPACE_USED < 50 then 'OK'
+         end) STATUS,chr(10)
+from
+(select PERCENT_SPACE_USED,NUMBER_OF_FILES from V\$RECOVERY_AREA_USAGE where FILE_TYPE='ARCHIVED LOG') a,
+(select value from v\$parameter where name='db_recovery_file_dest_size') b,
+(select name db_name from v\$database) c
+/
+
+REM set serveroutput off feedback off
+
+declare
+   v_space number := 0;
+
+begin
+
+  select percent_space_used
+    into v_space
+    from v\$recovery_area_usage
+   where FILE_TYPE='ARCHIVED LOG';
+
+
+  if v_space > $THRESHOLD then
+
+     raise_application_error(-20000,'The archive log directory is ' || v_space || ' pct full... OFFLOAD ARCHIVELOGS IMMEDIATELY.');
+
+  end if;
+
+end;
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s ${SYSCONN}@$DB 
+
+retcode=$?
+
+if [ $retcode -ne 0 ]; then
+   echo "You can backup/remove archivelogs by executing the following command:"
+   echo "\$ORACLE_HOME/bin/rman target / @/cloudsfs1/jenkins/RMAN_ARCH.rcv"
+fi
+
+exit $retcode
+
+

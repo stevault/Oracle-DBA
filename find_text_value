@@ -1,0 +1,102 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+
+ADDITIONAL_CRITERIA="1=1"
+OWNER="IVOS_ST"
+STRING="%Expert Fees%"
+SHOWIT='N'
+DOIT='N'
+UPPER='N'
+TOP="1=1"
+
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -addl) ADDITIONAL_CRITERIA="$1"; shift ;;
+-showit) SHOWIT='Y';;
+  -doit) DOIT='Y';;
+   -top) TOP="rownum <= $1"; shift ;;
+ -owner) OWNER=$1; shift ;;
+ -upper) UPPER='Y';;
+-string) STRING=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+set serveroutput on 
+declare 
+   v_sql varchar2(2000);
+   v_out1 number;
+   v_out2 number;
+   v_out3 number;
+   v_tc1 number;
+   v_cc1 number;
+   v_lasttable varchar2(90);
+begin
+  v_tc1 := 0;
+  v_cc1 := 0;
+  v_lasttable := '';
+  dbms_output.put_line('--TABLE_NAME, COLUMN_NAME, TOTAL_ROWS, DISTINCT_VALUES, MATCHING_VALUES');
+
+  for search_col in (	  select column_name , table_name
+			    from dba_tab_columns t, dba_segments s
+			   where s.owner = 'IVOS_ST'
+			     and t.owner = s.owner
+			     and t.table_name = s.segment_name
+			     and t.data_type like '%CHAR%'
+			     and $ADDITIONAL_CRITERIA
+			     and $TOP
+			     and t.table_name not like 'MLOG%'
+			     and t.table_name = UPPER(t.table_name)
+			     and extents <= 2
+			     and bytes < 100*1024*1024
+			   order by s.bytes asc
+			)
+    loop
+	if (v_lasttable != search_col.table_name)  then
+           v_tc1 := v_tc1+1;
+        end if;
+
+	v_lasttable := search_col.table_name ;
+
+	v_sql := 'select count(1), count(distinct ' || search_col.column_name || ')';
+	v_sql := v_sql || CASE WHEN '$UPPER' = 'Y' THEN
+			', nvl(sum(case when UPPER(' || search_col.column_name || ') like UPPER(''$STRING'') then 1 else 0 end),0) '
+			ELSE
+			', nvl(sum(case when ' || search_col.column_name || ' like  ''$STRING'' then 1 else 0 end),0) '
+			END;
+	v_sql := v_sql || ' from ivos_st.' || search_col.table_name ;
+
+--		v_sql := v_sql || '@ivosprod';
+    if ('$SHOWIT' = 'Y') then
+	dbms_output.put_line(v_sql);
+    end if;
+
+    if ('$DOIT' = 'Y') then
+	execute immediate v_sql into v_out1, v_out2, v_out3;
+    end if;
+
+		if (v_out3 > 0) then 
+ 			dbms_output.put_line('--' || search_col.table_name || ',' || search_col.column_name || ',' || v_out1 || ',' || v_out2 || ',' || v_out3);
+			dbms_output.put_line('----------------------------------------------------------------------');
+		end if;
+   
+	v_cc1 := v_cc1+1;
+
+    end loop;
+
+     dbms_output.put_line('--' || v_cc1 || ' possible columns, ' || v_tc1 || ' in tables.');
+
+end;
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

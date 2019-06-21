@@ -1,0 +1,93 @@
+DB=$ORACLE_SID
+TMP=/var/tmp/dbareg$$.tmp
+TODAY="1=1"
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+ -today) TODAY='action_time >= trunc(sysdate)' ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+go_v12() {
+
+echo "
+
+set feedback off
+
+col description format a70
+col action_time format a30
+col action format a20
+
+whenever sqlerror exit sql.sqlcode
+
+ select
+	action_time, VERSION, ACTION, DESCRIPTION
+	, 'dba' src
+--	, PATCH_ID,  PATCH_UID,
+--	, FLAGS
+--	, INSTALL_ID
+--	, BUNDLE_SERIES,            BUNDLE_ID, BUNDLE_DATA
+--	, PATCH_DESCRIPTOR, PATCH_DIRECTORY, LOGFILE
+   from dba_registry_sqlpatch
+  where $TODAY
+   and action not in ('VIEW INVALIDATE','BOOTSTRAP')
+UNION ALL
+ select 
+	action_time, VERSION, ACTION , comments
+	, 'reg'
+--ACTION_TIME                    ACTION               NAMESPACE                      VERSION                                ID COMMENTS                                 BUNDLE_SERIES
+   from sys.registry\$history
+ where $TODAY
+   and action not in ('VIEW INVALIDATE','BOOTSTRAP')
+order by action_time desc;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+
+retcode=$?
+return $retcode
+
+}
+
+go_v11() {
+
+echo "
+
+set feedback off
+col comments format a40
+col action_time format a30
+col action format a20
+
+ select 
+	action_time, VERSION, ACTION , comments --, STATUS
+--ACTION_TIME                    ACTION               NAMESPACE                      VERSION                                ID COMMENTS                                 BUNDLE_SERIES
+   from sys.registry\$history
+ where $TODAY
+   and action not in ('VIEW INVALIDATE','BOOTSTRAP')
+order by action_time desc;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+
+}
+
+go_v12 > $TMP
+
+if [ $? -ne 0 ]; then
+   go_v11
+else
+   cat $TMP
+fi
+
+
+

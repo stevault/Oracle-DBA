@@ -1,0 +1,27 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+col sqlhash format a30
+
+ select s.sid, s.username, u.tablespace, s.sql_hash_value || '/' || u.sqlhash sqlhash, u.segtype, u.contents, u.blocks
+ from v\$session s, v\$tempseg_usage u
+ where s.saddr = u.session_addr
+order by u.blocks
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

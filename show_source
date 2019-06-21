@@ -1,0 +1,81 @@
+#!/bin/ksh
+
+DB=$ORACLE_SID
+OWNERCLAUSE="1=1"
+TYPECLAUSE="1=1"
+SHOWERROR=N
+
+if [ $# -lt 1 ]; then
+   echo -e "Missing parameter - object_name."
+   echo -e "SYNTAX:  $0 <object_name> [ -d <database ]\n\n"
+   exit 2
+fi
+
+OBJECT=$1
+shift
+
+. /home/oracle/awdba/.sh_common
+
+##############################################################
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+   -err) SHOWERROR=Y;;
+ -owner) OWNERCLAUSE="owner = '$1'"; shift ;;
+  -type) TYPECLAUSE="type= '$1'"; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+##############################################################
+
+Show_error() {
+echo "
+
+col text format a200
+set lines 250 pages 9999 feedback off
+
+ select line, text
+   from dba_errors
+  where name = upper('$OBJECT')
+    and $OWNERCLAUSE
+    and $TYPECLAUSE
+  order by sequence;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+}
+
+Show_source () {
+echo "
+
+col text format a200 
+set lines 250 pages 9999 feedback off
+
+ select decode('$SHOWERROR','Y',line,'') l, text
+   from dba_Source
+  where name = upper('$OBJECT')
+    and $OWNERCLAUSE
+    and $TYPECLAUSE
+  order by line;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+}
+
+echo "+===================================================================="
+Show_source
+echo "+===================================================================="
+if [ $SHOWERROR = Y ]; then
+   Show_error
+fi
+echo "+===================================================================="

@@ -1,0 +1,114 @@
+DB=$ORACLE_SID
+THRESHSEC=1000
+KILL='N'
+REFRESH=N
+ORIGINAL_COMMAND_LINE="$0 $*"
+REFSEC=3
+
+##################################################################################
+while [ $# -ge 1 ]; do
+
+  opt=$1
+  shift
+
+  case $opt in
+      -d) DB=$1; shift ;;
+      -k) KILL='Y' ;;
+      -s) THRESHSEC=$1; shift ;;
+     -eq) OPERATOR=$1; shift ;;
+-refresh) REFRESH=Y; REFSEC=$1; shift ;;
+       *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+if [ "$REFRESH" = "Y" ]; then
+
+ while :
+ do
+
+   clear
+   NEW_COMMAND_LINE=`echo "$ORIGINAL_COMMAND_LINE" | sed 's;-refresh [0-9]*;;'`
+   $NEW_COMMAND_LINE
+   sleep $REFSEC
+
+ done
+
+fi
+
+
+##################################################################################
+echo "
+
+set feedback off
+alter session set nls_date_format = 'DD/Mon HH24:MI:SS';
+set feedback 10
+
+col inst_id heading I format 9
+col sql_id format a13
+col sid format 99999
+col sql_exec_start format a15
+col elap_sec format 9,999,999
+col machine format a25
+col osuser format a15
+col username format a12
+col process format a8
+col program format a45
+
+prompt ALL RUNNING SQL
+
+select  inst_id, USERNAME,
+sid,
+serial#,
+-- COMMAND, SERVER, SCHEMANAME,
+ OSUSER,
+ --PROCESS,
+ MACHINE,
+ PROGRAM, 
+ STATUS,
+	sql_id, logon_time, sql_exec_start, (sysdate-sql_exec_start)*24*60*60 elap_sec
+   from gv\$session
+  where sql_exec_start is not null
+    and status != 'INACTIVE'
+    and (sysdate - sql_exec_start) > $THRESHSEC/(24*60*60)
+  order by sql_exec_start desc
+/
+
+set long 99999 lines 200
+col n format 999
+col sql_text format a160
+
+prompt Reporting Long Running SQL (threshold = $THRESHSEC seconds)
+
+ select count(1) n, q.sql_id, q.sql_text
+   from gv\$sql q, gv\$session s
+  where s.sql_id = q.sql_id
+    and s.inst_id = q.inst_id
+    and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
+    and s.status != 'INACTIVE'
+  group by q.sql_id, q.sql_text
+/
+
+set feedback off 
+col INSTANCE_1 format a120
+col INSTANCE_2 format a120
+
+ select 'alter system kill session ''' || sid || ',' || serial# || ''';' INSTANCE_1
+   from gv\$session s
+  where '$KILL' = 'Y'
+    and inst_id = 1
+    and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
+    and s.status != 'INACTIVE'
+/
+
+ select 'alter system kill session ''' || sid || ',' || serial# || ''';' INSTANCE_2
+   from gv\$session s
+  where '$KILL' = 'Y'
+    and inst_id = 2
+    and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
+    and s.status != 'INACTIVE'
+/
+
+
+" | sqlplus -s $SYSCONN@$DB
+

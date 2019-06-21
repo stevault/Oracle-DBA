@@ -1,0 +1,140 @@
+DATEFORMAT='YYYY-MON-DD-HH24:MI:SS'
+SYSDATE2=`date '+%Y-%m-%d-%H:%M:%S'`
+#SYSDATE="to_date('$SYSDATE2','YYYY-MM-DD-HH24:MI:SS')"
+SYSDATE="to_date('$SYSDATE2','YYYY-MM-DD-HH24:MI:SS')"
+DB=$ORACLE_SID
+DAYSAGO=3
+KILL=N
+SETUP=n
+FORCESETUP=n
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+        -d) DB=$1; shift ;;
+      -all) for db in $LOCALSIDS
+do
+     echo $db
+     $0 -d $db
+done ; exit ;;
+  -daysago) DAYSAGO=$1 ; shift ;;
+    -setup) SETUP='Y';;
+    -forcesetup) SETUP='Y'; FORCESETUP='Y';;
+     -kill) KILL=Y;;
+     -opts) sh_show_opts ; exit 0 ;;
+         *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+#####################################################
+SetupSqlNav() {
+
+echo "
+
+whenever sqlerror exit sql.sqlcode;
+set serveroutput on
+
+declare
+  v_objs number;
+  v_sql varchar2(2000);
+begin
+
+   dbms_output.put_line('Running setup ');
+
+   select count(1) into v_objs from dba_tables where owner = 'AWDBA' and table_name = 'SQLNAV_KILLS';
+
+   if (v_objs > 0 AND '$FORCESETUP' = 'Y') then
+
+     v_sql := 'drop table AWDBA.SQLNAV_KILLS ';
+
+     dbms_output.put_line(v_sql);
+     execute immediate v_sql;
+
+     v_objs := 0;
+
+   end if;
+
+   if (v_objs = 0) then
+
+      v_sql := 'create table AWDBA.SQLNAV_KILLS (
+	kill_date DATE,
+	db varchar2(20),
+	sid number,
+	serial number,
+	osuser varchar2(40),
+	username varchar2(40),
+	logon_time DATE,
+	prev_exec_start DATE
+	)';
+
+      dbms_output.put_line(v_sql);
+      execute immediate v_sql;
+
+   end if;
+
+end;
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@awrwh
+
+}
+
+
+#####################################################
+ShowSqlnav() {
+
+echo "
+
+set pagesize 0 linesize 500 feedback off echo off verify off 
+
+alter session set nls_date_format = '$DATEFORMAT';
+
+ select 
+	sid, serial#, status, osuser, prev_exec_start, logon_time, last_call_et, machine, terminal, username
+   from v\$session a
+  where program = 'sqlnavigator.exe'
+    and sql_exec_start is null 
+    and prev_exec_start < sysdate - $DAYSAGO 
+    and status != 'KILLED'
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+
+}
+
+#####################################################
+# main
+
+if [ $SETUP = 'Y' ]; then
+   SetupSqlNav
+   exit $?
+fi
+
+ShowSqlnav  
+
+if [ $KILL = 'Y' ]; then
+
+   ShowSqlnav | while read sid serial status osuser prev_exec_start logon_time last_call_et machine terminal username
+   do
+      echo "Killing $osuser connection to $username idle since $prev_exec_start "
+
+      echo "insert into sqlnav_kills( kill_date, db, sid, serial, osuser, username, logon_time, prev_exec_start) values ($SYSDATE, '$DB', '$sid', '$serial', '$osuser', '$username', to_date('$logon_time','$DATEFORMAT'), to_date('$prev_exec_start','$DATEFORMAT'));" \
+		| $ORACLE_HOME/bin/sqlplus -s $SYSCONN@awrwh
+
+      echo "alter system kill session '$sid,$serial';" 	\
+		| $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+
+   done
+
+fi
+
+#####################################################
+

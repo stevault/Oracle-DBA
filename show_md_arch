@@ -1,0 +1,99 @@
+DB=$ORACLE_SID
+MAXDAYS=100
+NUMDAYS=$MAXDAYS
+WKDY_CLAUSE="1=1"
+MAXHISTLIMIT="rownum < 24*$MAXDAYS"
+DIMENSIONS=md_hour
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+       -d) DB=$1; shift ;;
+ -numdays) NUMDAYS=$1; shift;;
+    -dims) DIMENSIONS=$1; shift ;;
+-weekdays) WKDY_CLAUSE="md_daytype = 'WEEKDAY'" ;;
+-overridemax) MAXHISTLIMIT="1=1" ;;
+    -opts) sh_show_opts ; exit 0 ;;
+        *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+set feedback off
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+set feedback on
+
+col md_hour format a22
+col md_day format a22
+col md_datehour format a22
+col window_dys format 9999
+col window_hrs format 9999
+
+col dys format 9999
+col hrs format 9999
+col rws format 99999
+
+col avg_mb_per_hr format 99999.99
+col avg_file_size format 99999.99
+col total_size format 99,999,999
+col num_files format 99999
+
+compute sum of num_files on report
+compute sum of total_size on report
+break on report
+
+with arch_by_hour as
+(select to_char(trunc(first_time),'DD-MON') arch_day
+	, to_date(to_char(first_time,'DD-MON-YYYY HH24:'),'DD-MON-YYYY HH24:') arch_datehour
+	, trunc(first_time) arch_date
+	, case when to_char(first_time,'DY') in ('SAT','SUN') then 'WEEKEND' else 'WEEKDAY' end arch_daytype
+	, to_char(first_time,'hh24:') arch_hr
+	, sum(blocks*block_size)/1024/1024 arch_mb
+   from v\$archived_log l
+  where l.dest_id = 1
+  group by to_char(trunc(first_time),'DD-MON') 
+	, to_date(to_char(first_time,'DD-MON-YYYY HH24:'),'DD-MON-YYYY HH24:') 
+	, trunc(first_time) 
+	, to_char(first_time,'hh24:') 
+	, case when to_char(first_time,'DY') in ('SAT','SUN') then 'WEEKEND' else 'WEEKDAY' end 
+)
+, md as
+(select curr_hr - (hrsago/24) md_datehour
+ 	, to_char(curr_hr - (hrsago/24),'HH24:')||'00' md_hour
+ 	,   trunc(curr_hr - (hrsago/24)) md_date
+ 	, to_char(trunc(curr_hr - (hrsago/24)),'D-DAY') md_day
+	, case when to_char(curr_hr - (hrsago/24),'DY') in ('SAT','SUN') then 'WEEKEND' else 'WEEKDAY' end md_daytype
+   from (select to_date(to_char(sysdate,'DD-MON-YYYY HH24'),'DD-MON-YYYY HH24') curr_hr
+		, rownum hrsago
+	   from dba_objects
+	  where $MAXHISTLIMIT) r
+)
+select
+	$DIMENSIONS
+	, sum(nvl(arch_mb,0)) / count(distinct md_datehour) avg_mb_per_hr
+	, case when count(distinct arch_datehour) = 0 then 0 else sum(nvl(arch_mb,0)) / count(distinct arch_datehour) end avg_file_size
+	, sum(nvl(arch_mb,0)) total_size
+	, count(distinct arch_datehour) num_files
+	, count(distinct md_datehour) num_hours
+	, count(distinct md_date) num_days
+	, count(distinct md_hour) num_hrs
+from arch_by_hour, md
+	, (select min(first_time) logdate from v\$archived_log) minlogdate
+where md.md_datehour = arch_datehour (+)
+  and $WKDY_CLAUSE
+  and md_date > trunc(sysdate)- $NUMDAYS
+  and md_datehour > minlogdate.logdate
+group by
+	$DIMENSIONS
+order by
+	$DIMENSIONS
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+

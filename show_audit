@@ -1,0 +1,85 @@
+DB=$ORACLE_SID
+DETAIL=N
+SPECIFIC_DATE="trunc(sysdate)"
+OP="="
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+         -d) DB=$1; shift ;;
+     -today) SPECIFIC_DATE="trunc(sysdate)" ;;
+ -yesterday) SPECIFIC_DATE="trunc(sysdate)-1" ;;
+      -date) SPECIFIC_DATE="to_date('$1','DD-MON-YYYY')" ; shift;;
+     -since) OP=">="; SPECIFIC_DATE="to_date('$1','DD-MON-YYYY')" ; shift;;
+    -detail) DETAIL=Y;;
+      -opts) sh_show_opts ; exit 0 ;;
+          *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+set linesize 300
+
+col os_username format a20
+col username format a20
+col userhost format a40
+col terminal format a20
+col owner format a20
+col obj_name format a90
+col action_name format a30
+col sql_text format a80
+
+set feedback off
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+set feedback off
+
+ select x\$timestamp, username, command, osuser, process, machine, terminal, program--, action
+   from sys.aw_audit_trail
+  where username not in ('DWDI','RDXMON','DBSNMP','SYS')
+    and trunc(x\$timestamp) = $SPECIFIC_DATE
+/
+
+ select 
+	username, osuser, machine, terminal, program--, action
+	, min(x\$timestamp)
+	, max(x\$timestamp)
+	, count(1)
+   from sys.aw_audit_trail
+  where 1=1
+    and username not in ('DWDI','RDXMON','DBSNMP','SYS')
+    and username in ( 'DW_ST','DW_API','DW_MD')
+    and machine != 'awnjposapp03'
+    and machine != 'AWACGBL\AWNJPOSIIS01'
+    and machine != 'AWACGBL\AWNJPOSDGEN03'
+    and trunc(x\$timestamp) = $SPECIFIC_DATE
+  group by 
+	username, osuser, machine, terminal, program--, action
+/
+
+select os_username, username, userhost, terminal
+	, min(timestamp) first_tm
+	, max(timestamp) last_tm
+	, count(1) cnt
+   from dba_audit_trail
+  where 1=1
+--    and username in ( 'DW_ST','DW_API','DW_MD')
+--    and userhost != 'awnjposapp03'
+--    and userhost != 'AWACGBL\AWNJPOSIIS01'
+--    and userhost != 'AWACGBL\AWNJPOSDGEN03'
+--
+    and Action_name = 'LOGON'
+--
+    and trunc(timestamp) $OP $SPECIFIC_DATE
+--
+  group by os_username, username, userhost, terminal
+  order by os_username, username, userhost, terminal
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

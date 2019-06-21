@@ -1,0 +1,25 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+col user_name format a40
+select * from dba_stmt_audit_opts; 
+select * from dba_obj_audit_opts;
+select * from dba_priv_audit_opts;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

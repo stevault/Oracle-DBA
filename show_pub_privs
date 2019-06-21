@@ -1,0 +1,16 @@
+
+[ $# -ge 1 ] && DB=$1 || exit 2
+
+echo "
+
+set pages 0 lines 200 trimspool on verify off feedback off
+
+col owner format a15
+
+rem select * from dba_tab_privs where grantee ='PUBLIC' order by 1, 2, 3, 4, 5
+
+select * from dba_tab_privs where grantee ='CONNECT' order by 1, 2, 3, 4, 5
+/
+
+" | sqlplus -s awdba/awdba@$DB
+

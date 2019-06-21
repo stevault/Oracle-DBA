@@ -1,0 +1,96 @@
+
+DB=$ORACLE_SID
+THRESHOLD=4
+
+
+#######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+     -t) THRESHOLD=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+#######################################################
+
+echo "
+
+set define off
+set feedback off
+
+col osuser format a20
+col username format a12
+col action format a30
+col terminal format a20
+
+col ord noprint
+
+select nvl(s.blocking_session,s.sid) ord, 'BLOCKED' styp, s.inst_id, s.sid, s.serial#, s.blocking_session, s.blocking_instance, s.seconds_in_wait
+	, s.process, s.osuser, s.username, s.terminal
+	, s.action
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+union 
+select distinct nvl(bs.blocking_session, bs.sid) ord, 'Blocking' styp, bs.inst_id, bs.sid, bs.serial#, bs.blocking_session, bs.blocking_instance, bs.seconds_in_wait
+	, bs.process, bs.osuser, bs.username, bs.terminal
+	, bs.action
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+order by ord, inst_id, styp desc, sid, serial#
+/
+
+set pages 0
+
+select distinct 'connect awdba/&&mypassword@' || i.instance_name
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+   and i.instance_number = 1
+/
+
+select distinct 'alter system kill session ''' || bs.sid || ',' || bs.serial# || ''';'
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+   and i.instance_number = 1
+/
+
+-- BLOCKING_INSTANCE                                                                                                       NUMBER
+-- BLOCKING_SESSION                                                                                                        NUMBER
+
+select distinct 'connect awdba/&&mypassword@' || i.instance_name
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+   and i.instance_number = 2
+/
+
+select distinct 'alter system kill session ''' || bs.sid || ',' || bs.serial# || ''';'
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+   and i.instance_number = 2
+/
+
+" | sqlplus -s ${SYSCONN}@$DB
+

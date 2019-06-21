@@ -1,0 +1,87 @@
+#!/bin/ksh
+
+DB=$ORACLE_SID
+OPERATOR="="
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameter - trigger_name."
+   exit 1
+fi
+
+TRIGGER=$1
+shift
+
+while [ $# -ge 1 ]; do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+    -eq) OPERATOR=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+echo "
+
+col owner format a10
+col trigger_name format a40
+col TRIGGERING_EVENT format a40
+col COLUMN_NAME format a40
+col REFERENCING_NAMES format a40
+col WHEN_CLAUSE format a40
+
+
+ select
+ OWNER, TRIGGER_NAME,
+ TRIGGER_TYPE,
+ TRIGGERING_EVENT,
+ TABLE_OWNER,
+ BASE_OBJECT_TYPE,
+ TABLE_NAME
+   from dba_triggers
+  where trigger_name $OPERATOR upper('$TRIGGER')
+order by owner, trigger_name;
+
+ select
+ COLUMN_NAME,
+ REFERENCING_NAMES,
+ WHEN_CLAUSE,
+ STATUS,
+-- DESCRIPTION,
+ ACTION_TYPE,
+ --TRIGGER_BODY,
+ CROSSEDITION,
+ BEFORE_STATEMENT,
+ BEFORE_ROW,
+ AFTER_ROW,
+ AFTER_STATEMENT,
+ INSTEAD_OF_ROW,
+ FIRE_ONCE,
+ APPLY_SERVER_ONLY
+   from dba_triggers
+  where trigger_name $OPERATOR upper('$TRIGGER')
+order by owner, trigger_name;
+
+" |  $ORACLE_HOME/bin/sqlplus -s awdba/awdba@$DB
+
+if [ "$OPERATOR" = "=" ]; then
+
+echo "
+
+set long 99999
+
+ select
+ trigger_body 
+   from dba_triggers
+  where trigger_name $OPERATOR upper('$TRIGGER')
+order by owner, trigger_name;
+
+" |  $ORACLE_HOME/bin/sqlplus -s awdba/awdba@$DB
+
+fi
+
+exit
+
