@@ -1,0 +1,167 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+
+TOPROWS=20
+SQLCLAUSE="1=1"
+TIMECLAUSE="begin_interval_time > sysdate-30"
+
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+       -d) DB=$1; shift ;;
+    -opts) sh_show_opts ; exit 0 ;;
+     -top) TOPROWS=$1; shift ;;
+####
+      -sqlid) SQLCLAUSE="sql_id = '$1'"; shift ;;
+      -bsnap) BSNAP=$1; shift ;;
+      -esnap) ESNAP=$1; shift ;;
+      -bdate) BDATE="$1"; shift ;;              # DD-MON-YYYY HH24:MI:SS
+      -edate) EDATE="$1"; shift ;;              # DD-MON-YYYY HH24:MI:SS
+   -lasthour) TIMECLAUSE="begin_interval_time >= sysdate-(1/24) and begin_interval_time < sysdate" ;;
+      -today) TIMECLAUSE="begin_interval_time >= trunc(sysdate) and begin_interval_time < sysdate" ;;
+  -yesterday) TIMECLAUSE="begin_interval_time >= trunc(sysdate-1) and begin_interval_time < trunc(sysdate)" ;;
+        *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+######################################################
+show_sql_plans () {
+
+echo -e "
+
+set linesize 300 trimspool on feedback off echo off
+
+col ela_time_i1 format 999999
+col cpu_time_i1 format 999999
+col iow_time_i1 format 999999
+col ela_time_i2 format 999999
+col cpu_time_i2 format 999999
+col iow_time_i2 format 999999
+col ela_time format 999999
+col cpu_time format 999999
+col iow_time format 999999
+
+select 
+	sql_id
+		,sum(case when instance_number = 1 then num_plans else null end) num_plans_i1
+		,sum(case when instance_number = 1 then ela_time else null end) ela_time_i1
+		,sum(case when instance_number = 1 then cpu_time else null end) cpu_time_i1
+		,sum(case when instance_number = 1 then iow_time else null end) iow_time_i1
+		,sum(case when instance_number = 1 then exec_count else null end) exec_count_i1
+--
+		,sum(case when instance_number = 2 then num_plans else null end) num_plans_i2
+		,sum(case when instance_number = 2 then ela_time else null end) ela_time_i2
+		,sum(case when instance_number = 2 then cpu_time else null end) cpu_time_i2
+		,sum(case when instance_number = 2 then iow_time else null end) iow_time_i2
+		,sum(case when instance_number = 2 then exec_count else null end) exec_count_i2
+ from (
+select sql_id,
+	instance_number,
+	count(plan_hash_value) num_plans,
+	sum(ela_time)/1000000 ela_time,
+	sum(cpu_time)/1000000 cpu_time,
+	sum(iow_time)/1000000 iow_time,
+	sum(exec_count) exec_count
+   from (select dhs.sql_id, dhs.plan_hash_value
+	     	, ds.instance_number
+		, sum(dhs.executions_delta) exec_count
+		, sum(dhs.elapsed_time_delta) ela_time
+		, sum(dhs.cpu_time_delta) cpu_time
+		, sum(dhs.iowait_delta) iow_time
+	    from dba_hist_sqlstat dhs, dba_hist_snapshot ds
+	   where dhs.snap_id = ds.snap_id
+	     and dhs.instance_number = ds.instance_number
+	     and $TIMECLAUSE
+	   group by dhs.sql_id, dhs.plan_hash_value
+	     	, ds.instance_number
+	)
+  group by sql_id , instance_number
+ having count(plan_hash_value) > 1
+ order by ela_time desc, num_plans desc
+)
+where rownum < $TOPROWS
+group by sql_id
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+}
+
+######################################################
+show_sql_plan_deets () {
+
+echo -e "
+
+set linesize 300 trimspool on feedback off echo off
+
+col ela_time_i1 format 999999
+col cpu_time_i1 format 999999
+col iow_time_i1 format 999999
+col ela_time_i2 format 999999
+col cpu_time_i2 format 999999
+col iow_time_i2 format 999999
+col mintime format a30
+col maxtime format a30
+col difftime format a30
+
+break on sql_id skip 1 nodup
+
+select * from (
+select sql_id,
+	instance_number,
+	plan_hash_value,
+	mintime,
+	maxtime,
+	stddev(ela_time) stddev_time, 
+	sum(executions) EXECUTIONS,
+  	count(plan_hash_value) over (partition by sql_id) hash_count,
+	sum(ela_time)/1000000 ela_time,
+	sum(cpu_time)/1000000 cpu_time,
+	sum(iow_time)/1000000 iow_time
+   from (select dhs.sql_id, dhs.plan_hash_value, ds.instance_number
+		, sum(executions_delta) executions
+--		, count(1) executions
+		, min(ds.begin_interval_time) mintime
+		, max(ds.end_interval_time) maxtime
+		, sum(dhs.elapsed_time_delta) ela_time
+		, sum(dhs.cpu_time_delta) cpu_time
+		, sum(dhs.iowait_delta) iow_time
+	    from dba_hist_sqlstat dhs, dba_hist_snapshot ds
+	   where dhs.snap_id = ds.snap_id
+	     and dhs.instance_number = ds.instance_number
+	     and $TIMECLAUSE
+	   group by dhs.sql_id, dhs.plan_hash_value
+	,ds.instance_number
+	)
+  group by sql_id,
+	instance_number,
+	plan_hash_value,
+	mintime,
+	maxtime
+order by ela_time desc
+	,sql_id, instance_number, maxtime desc
+)
+where rownum < $TOPROWS
+  and hash_count > 1
+order by 	ela_time desc
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+}
+
+######################################################
+
+show_sql_plans
+
+show_sql_plan_deets 
+
+

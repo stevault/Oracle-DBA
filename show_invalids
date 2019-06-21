@@ -1,0 +1,149 @@
+#!/bin/ksh
+. /cloudsfs1/jenkins/OracleEnv.h
+
+BASE=`basename $0`
+DB=$ORACLE_SID
+ACTION=REPORT
+FIXSQL=/var/tmp/${BASE}$$.sql
+HTML=OFF
+FILTER="1=1"
+
+. /home/oracle/awdba/.sh_common
+
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+   -fix) ACTION=FIX ;;
+   -sum) ACTION=SUMMARISE;;
+  -filter) FILTER="$1"; shift ;;
+  -html) HTML=ON ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+if [ "$ACTION" = "REPORT" ]; then
+
+
+echo "
+
+col owner format a15
+
+set feedback off
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+set pagesize 900 linesize 200 markup html $HTML
+
+col object_name format a50
+col db format a10
+
+ select '$DB' db, owner, object_type, object_name, status, last_ddl_time, created
+   from dba_objects 
+  where owner NOT IN ('SYS','SYSTEM')
+    and object_type in ('PROCEDURE','FUNCTION','PACKAGE','TRIGGER','PACKAGE BODY','VIEW')
+    and status != 'VALID'
+    and $FILTER
+  order by owner, object_type, object_name
+/
+
+" | sqlplus -s $SYSCONN@$DB
+######################################################
+
+elif [ "$ACTION" = "SUMMARISE" ]; then
+
+
+echo "
+
+col owner format a15
+
+set pagesize 9000 feedback off
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+set linesize 200 markup html $HTML
+
+col object_name format a50
+col db format a10
+
+compute sum of PROCEDUREs on report
+compute sum of FUNCTIONs on report
+compute sum of PACKAGEs on report
+compute sum of TRIGGERs on report
+compute sum of PACKAGE_BODYs on report
+compute sum of VIEWs on report
+
+break on owner skip 1 nodup on report
+
+ select '$DB' db, owner
+    	, sum(case when object_type = 'PROCEDURE' then 1 else null end) PROCEDUREs
+	, sum(case when object_type = 'FUNCTION' then 1 else null end) FUNCTIONs
+	, sum(case when object_type = 'PACKAGE' then 1 else null end) PACKAGEs
+	, sum(case when object_type = 'TRIGGER' then 1 else null end) TRIGGERs
+	, sum(case when object_type = 'PACKAGE BODY' then 1 else null end) PACKAGE_bodys
+	, sum(case when object_type = 'VIEW' then 1 else null end) VIEWs
+	, count(1) ALL_OBJECTS
+   from dba_objects 
+  where owner NOT IN ('SYS','SYSTEM')
+    and object_type in ('PROCEDURE','FUNCTION','PACKAGE','TRIGGER','PACKAGE BODY','VIEW')
+    and status != 'VALID'
+    and $FILTER
+  group by owner
+  order by owner
+/
+
+" | sqlplus -s $SYSCONN@$DB
+
+#######################################################
+
+else
+
+echo "
+
+set pages 0 feedback off linesize 250 trimspool on termout off
+
+spool $FIXSQL
+
+ select 'PROMPT *******************' 
+	|| chr(10) || 'PROMPT ' || object_type || '  ' || owner || ' ' || object_name
+	|| chr(10) || 'alter ' || object_type || ' ' || owner || '.\"' || object_name || '\" compile ;'
+	|| chr(10) || ' show error'  sql
+   from dba_objects 
+  where owner NOT IN ('SYS','SYSTEM','SYSMAN')
+    and object_type in ('PROCEDURE','FUNCTION','PACKAGE','TRIGGER','VIEW')
+    and status != 'VALID'
+    and $FILTER
+union all
+ select 'PROMPT *******************' 
+	|| chr(10) || 'PROMPT ' || object_type || '  ' || owner || ' ' || object_name
+	|| chr(10) || 'alter ' || object_type || ' ' || owner || '.\"' || object_name || '\" compile ' || case when object_type = 'PACKAGE' then 'BODY' else null end || ';' 
+	|| chr(10) || ' show error'  sql
+   from dba_objects 
+  where owner NOT IN ('SYS','SYSTEM','SYSMAN')
+    and object_type = 'PACKAGE'
+    and status != 'VALID'
+    and $FILTER
+/
+
+spool off
+
+" | sqlplus -s $SYSCONN@$DB 1>/dev/null
+
+echo "
+
+set feedback on 
+@$FIXSQL
+
+" | sqlplus -s $SYSCONN@$DB
+
+fi
+

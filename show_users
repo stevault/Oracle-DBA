@@ -1,0 +1,37 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+CONN=$SYSCONN@$DB
+
+$ORACLE_HOME/bin/sqlplus -s "$CONN as sysdba" << EOF
+
+whenever sqlerror exit sql.sqlcode
+
+set lines 200 pages 0 feedback off verify off define off
+
+ select '$DB' || ',' ||  username || ',' ||  created || ',' || account_status
+   from dba_users
+  where username not in ('SYS','SYSTEM')
+    and account_status not in ('LOCKED','EXPIRED & LOCKED')
+  order by username
+/
+
+
+EOF
+

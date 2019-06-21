@@ -1,0 +1,78 @@
+
+DB=$ORACLE_SID
+EQ='like'
+#COLS="p.*"
+COLS="db.name dbname, p.name, p.value"
+USRPWD=${SYSCONN}
+PAGESIZE=80
+
+if [ $# -lt 1 ] ;then
+   echo "Missing parameter <parametername>"
+   exit 2
+fi
+
+PARM="$1"
+shift
+
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+  case $opt in
+     -d) DB=$1; shift ;;
+     -e) EQ='=' ;;
+   -val) COLS=p.value ; PAGESIZE="0 feedback off" ;;
+     -u) USRPWD=$1 ; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+if [ $EQ == 'like' ]; then
+   PARM="%$PARM%"
+fi
+
+if [ $DB = 'all' ]; then
+
+   DBLIST=$ALLDBS
+
+else
+   DBLIST=$DB
+
+fi
+
+for db in $DBLIST
+do
+
+  CONNSTR=$USRPWD@$db
+
+echo "
+
+set linesize 120
+set pagesize $PAGESIZE
+
+col SID   format a10
+col dbNAME  format a10
+col NAME  format a30
+col VALUE format a60
+col type  format a15
+col UPDATE_COMMENT format a20
+col display_value noprint
+col ordinal noprint
+
+REM select name from v\$database;
+
+select $COLS
+  from v\$database db, v\$spparameter p
+where p.name $EQ '$PARM'
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s ${CONNSTR} as sysdba
+
+done
+

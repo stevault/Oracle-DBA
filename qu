@@ -1,0 +1,19 @@
+echo "
+
+set feedback off
+col c format 9999
+compute sum of c on report
+break on report
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+select sysdate current_time from dual;
+
+ select d.name, i.instance_name, s.osuser, s.username
+	, min(logon_time) first_logon, max(logon_time) latest_logon
+	, count(1) c
+   from v\$session s, v\$instance i, v\$database d
+  group by d.name, i.instance_name, s.osuser, s.username
+  order by d.name, i.instance_name, s.osuser, s.username;
+
+" | sqlplus -s $SYSCONN
+

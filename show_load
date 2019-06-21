@@ -1,0 +1,49 @@
+#######################################################
+#######################################################
+#
+# show_load
+#  (sjt)
+#   list server load for a specific server or all
+#
+#   SYNTAX:  show_load [ -all | -h <host> ]
+#
+#   FLAGS:
+#	-h "<hostlist>"
+#     -all all hosts as defined by $ALLHOSTS
+#
+#  examples
+#	show_load -h awnjpoda01-pub
+#	show_load -all
+#
+#   CREATED: 9/15/2016
+#
+#######################################################
+#######################################################
+
+HOSTLIST=`hostname`
+SILENT=n
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -s) SILENT=Y ;;
+     -h) HOSTLIST="$1"; shift ;;
+   -all) HOSTLIST=$ALLHOSTS ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+for hst in $HOSTLIST
+do
+  [ $SILENT = 'Y' ] ||  echo -e "$hst \c" 
+  ssh $hst "cat /proc/loadavg | cut -d' ' -f1"
+done
+

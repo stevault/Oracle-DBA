@@ -1,0 +1,30 @@
+DB=$ORACLE_SID
+DAYSAGO=1
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+  -daysago) DAYSAGO=$1 ; shift ;;
+     -opts) sh_show_opts ; exit 0 ;;
+         *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+#####################################################
+
+echo "
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+select * from sqlnav_kills where kill_date >= sysdate - $DAYSAGO;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@awrwh
+
+#####################################################

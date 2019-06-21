@@ -1,0 +1,71 @@
+DB=$ORACLE_SID
+EXPLAIN=n
+SQLTEXT=""
+SQLCONN=$SYSCONN
+
+if [ $# -lt 1 ]; then
+    echo "Missing parameter:  <sql_id>"
+    echo "syntax:  $0 <sql_id>"
+    exit 2
+fi
+
+SQLID=$1
+shift
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+   case $opt in
+       -d) DB=$1; shift ;;
+    -conn) SQLCONN=$1; shift ;;
+ -explain) EXPLAIN=Y ;;
+        *) echo "I don't know what $opt is...\n" ; exit 2;;
+   esac
+
+done
+
+######################################################
+show_sql () {
+
+echo -e "
+
+set pagesize 0 linesize 1000 trimspool on feedback off echo off
+set long 99999
+set longchunksize 99999
+col sql_text format a1000
+
+select sql_text
+  from dba_hist_sqltext
+  where sql_id = '$SQLID';
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+}
+
+
+show_sql $SQLID
+
+if [ $EXPLAIN = 'Y' ]; then
+  show_sql $SQLID | read SQLTEXT
+
+  echo "Explaining statement."
+
+echo "
+
+alter session set \"_WITH_SUBQUERY\" = MATERIALIZE;
+
+  explain plan for
+	 $SQLTEXT
+/
+
+  select * from table(dbms_xplan.display);
+
+" | $ORACLE_HOME/bin/sqlplus -s $SQLCONN@$DB 
+
+fi
+
+

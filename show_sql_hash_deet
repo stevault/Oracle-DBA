@@ -1,0 +1,67 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+
+sqlid="ban0r446hp8zh"
+
+if [ $# -lt 1 ]; then
+    echo "Missing sql-id"
+    exit 12
+fi
+
+sql_id=$1
+shift
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+col begin_interval_time format a40
+set pagesize 900
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+select
+ ss.SNAP_ID,
+ s.begin_interval_time,
+ ss.INSTANCE_NUMBER,
+ ss.PLAN_HASH_VALUE,
+ ss.OPTIMIZER_COST,
+ ss.OPTIMIZER_MODE,
+ ss.OPTIMIZER_ENV_HASH_VALUE,
+ ss.SHARABLE_MEM,
+ ss.LOADED_VERSIONS,
+ ss.VERSION_COUNT,
+ ss.MODULE
+from dba_hist_sqlstat ss, dba_hist_snapshot s
+where 1=1
+  and ss.snap_id = s.snap_id
+  and sql_id = '$sql_id'
+order by begin_interval_time
+/
+
+ select sql_id, plan_hash_value
+	, OPTIMIZER_COST
+	, ADDRESS
+	, HASH_VALUE
+	, OLD_HASH_VALUE
+	, PLAN_HASH_VALUE
+	, last_load_time
+  from v\$sqlarea 
+ where sql_id = '$sql_id'
+/
+
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

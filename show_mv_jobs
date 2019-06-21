@@ -1,0 +1,36 @@
+DB=$ORACLE_SID
+CRITERIA="1=1"
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -crit) CRITERIA="$1"; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+col what format a80
+
+set feedback off
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+set feedback 20
+
+select j.job, what
+	, nvl(jr.this_date, j.last_date)  d
+	, decode(jr.this_date,null,null,'Y') running
+ from dba_jobs j, dba_jobs_running jr
+where j.job = jr.job (+)
+  and $CRITERIA
+ order by d
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

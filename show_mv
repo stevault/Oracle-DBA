@@ -1,0 +1,71 @@
+#!/bin/ksh
+
+DB=$ORACLE_SID
+
+if [ $# -lt 1 ]; then
+   echo -e "Missing parameter - mview_name."
+   echo -e "SYNTAX:  $0 <mview_name> [ -d <database ]\n\n"
+   exit 2
+fi
+
+OBJECT=$1
+shift
+
+##############################################################
+
+while [ $# -ge 1 ]; do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+##############################################################
+
+echo show_object $OBJECT -d $DB
+show_object $OBJECT -d $DB
+echo show_segment $OBJECT -d $DB
+show_segment $OBJECT -d $DB
+echo show_table $OBJECT -d $DB
+show_table $OBJECT -d $DB
+
+echo "
+
+col owner format a10
+col query format a200
+col name format a25
+col master_owner format a10
+col master format a25
+col master_link format a25
+
+col next format a25
+set feedback off
+alter session set nls_date_Format = 'DD-MON-YYYY HH24:MI';
+
+ select owner, name
+	, master_owner, master, master_link
+	, refresh_method, last_refresh , type
+	, status, refresh_mode
+   from dba_snapshots
+  where name = upper('$OBJECT');
+
+set long 4999
+
+ select query
+   from dba_snapshots
+  where name = upper('$OBJECT');
+
+desc wh_st.$OBJECT
+
+select *
+from dba_registered_mviews
+where name = upper('$OBJECT');
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+

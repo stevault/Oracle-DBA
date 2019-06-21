@@ -1,0 +1,52 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+gettablelist () {
+echo "
+col table_name format a40
+col index_name format a40
+col tmb format 999999
+col imb format 999999
+set linesize 200 trimspool on feedback off
+
+
+with logged_segs as "
+ select t.table_name, t.logging #, s.bytes/1024/1024 imb
+	, i.index_name, i.logging, s.bytes/1024/1024 imb
+   from dba_tables t, dba_indexes i, dba_segments s
+  where i.logging = 'YES' or T.logging = 'YES'
+    and i.owner = 'WH_ST'
+    and i.table_name like 'MV%'
+--
+    and i.table_name = t.table_name
+    and i.owner = t.owner
+--
+    and i.index_name = s.segment_name
+    and i.owner = s.owner
+--
+  order by s.bytes desc
+"
+select * from logged_segs where rownum < 20
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+}
+
+
+gettablelist

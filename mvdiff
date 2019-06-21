@@ -1,0 +1,55 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+echo "
+
+col table_name format a40
+col column_name format a40
+
+col type_diff format a50
+col length_diff format a10
+col precision_diff format a10
+col scale_diff format a10
+
+with MV as (
+ select table_name, column_name, data_Type, data_length, data_precision, data_Scale
+   from dba_tab_columns
+  where owner = 'WH_ST'
+    and table_name like 'MVI%'
+),
+SRC as (
+ select table_name, column_name, data_Type, data_length, data_precision, data_Scale
+   from all_tab_columns@dw2ivos_dblink
+  where owner = 'IVOS_ST'
+)
+select mv.table_name, mv.columN_name
+	, case when mv.data_type != src.data_type then mv.data_type || ' / ' || src.data_type else null end type_diff
+	, case when mv.data_length != src.data_length then mv.data_length || ' / ' || src.data_length else null end length_diff
+	, case when mv.data_precision != src.data_precision then mv.data_precision || ' / ' || src.data_precision else null end precision_diff
+	, case when mv.data_scale != src.data_scale then mv.data_scale || ' / ' || src.data_scale else null end scale_diff
+from SRC, MV
+WHERE 'MVI_' || SRC.table_name = mv.table_name
+and src.column_name = mv.column_name
+and (mv.data_type != src.data_type
+	or mv.data_length != src.data_length
+	or mv.data_precision != src.data_precision
+	or mv.data_scale != src.data_scale)
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $DWMVCONN@$DB 

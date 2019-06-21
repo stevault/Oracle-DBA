@@ -1,0 +1,7 @@
+for db in $LOCALSIDS
+do
+  sqlplus -s awdba/awdba@$db << EOF
+set pages 0 lines 100 feedback off
+select name database, log_mode, flashback_on from v\$DATABASE;
+EOF
+done

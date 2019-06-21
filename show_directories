@@ -1,0 +1,27 @@
+
+DB=$ORACLE_SID
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+echo "
+
+col directory_name format a50
+col directory_path format a120
+
+prompt DIRECTORIES
+select *
+  from dba_directories
+/
+
+" | sqlplus -s ${SYSCONN}@$DB
+
+

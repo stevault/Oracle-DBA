@@ -1,0 +1,47 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameters."
+   echo "SYNTAX:  $0 <sql_id>"
+   exit 2
+fi
+
+SQL=$1
+shift
+
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+echo "
+set serveroutput on 
+
+DECLARE
+  v_sql varchar(30):= '$SQL';
+
+BEGIN
+  for SQLTOPURGE in (select distinct address || ',' || hash_value as PURGEADDR from v\$sql where sql_id = v_sql) loop
+
+     dbms_output.put_line('Purging ' || SQLTOPURGE.PURGEADDR);
+     sys.dbms_shared_pool.purge(SQLTOPURGE.PURGEADDR,'C');
+
+  end loop;
+
+END;
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

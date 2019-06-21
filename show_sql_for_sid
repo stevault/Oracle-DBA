@@ -1,0 +1,25 @@
+
+MYSID=$1
+MYINST=$2
+
+echo "
+
+set lines 200
+
+col sql_id format a15
+col sql_text format a140
+col name format a8
+col value_string format a30
+
+select oc.sql_id, s.sql_text, b.name, b.value_string
+ from gv\$open_cursor oc, gv\$sql s, gv\$sql_bind_capture b
+ where 1=1
+  and oc.sql_id = s.sql_id and oc.inst_id = s.inst_id
+  and s.sql_id  = b.sql_id and s.inst_id = b.inst_id
+  and oc.sid = $MYSID
+  and oc.inst_id = $MYINST
+  and b.value_string is not null; 
+
+" | sqlplus -s awdba/awdba
+
+

@@ -1,0 +1,46 @@
+DB=$ORACLE_SID
+TOP=n
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+   -top) TOP=Y; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+set lines 300
+col stat_name format a10
+col value format 999.99
+col inst_1_load format 999.99
+col inst_2_load format 999.99
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+select begtime, endtime
+        , sum(decode(instance_number,1,value,0)) inst_1_load
+        , sum(decode(instance_number,2,value,0)) inst_2_load
+	, sum(value) total_load
+from (
+select a.*, to_date(to_char(b.begin_interval_time,'DD-MON-YYYY HH24:MI'),'DD-MON-YYYY HH24:MI') begtime, to_date(to_char(b.end_interval_time,'DD-MON-YYYY HH24:MI'),'DD-MON-YYYY HH24:MI') endtime
+ from dba_hist_osstat a, dba_hist_snapshot b
+where a.snap_id = b.snap_id
+and a.instance_number = b.instance_number
+and a.stat_name = 'LOAD'
+)
+group by begtime, endtime
+order by begtime
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

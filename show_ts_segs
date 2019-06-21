@@ -1,0 +1,75 @@
+DB=$ORACLE_SID
+SEGOWNCLAUSE="1=1"
+SEGTYPECLAUSE="1=1"
+SORTTYPE=name
+
+if [ $# -lt 1 ]; then
+   echo "ERROR:  missing parameter"
+   echo "SYNTAX:  $0 <tablespace> [ -d <database> ] [ -o <owner> | all ] [ -t <segment_type> | all ]"
+   exit 2
+fi
+
+tablespace=$1
+shift
+
+while [ $# -ge 1 ]; do
+
+   opt=$1
+ 
+   case $opt in 
+	-d) shift; DB=$1; shift;;
+	-o) shift; SEGOWNER="owner = upper('$1')"; shift;;
+	-t) shift; SEGTYPE="segment_type = upper('$1')"; shift;;
+     -sort) shift; SORTTYPE=$1; shift ;;
+	 *) echo "I don't know what $opt is..."; exit 2;;
+   esac
+
+done
+
+
+case $SORTTYPE in 
+    name) ORDERBY="owner, segment_type, segment_name" ;;
+    size) ORDERBY="bytes asc" ;;
+      *) echo "ERROR:  not a valid sort type."; exit 2 ;;
+esac
+
+####################################################################################################
+
+echo "
+
+set feedback off serveroutput on pages 200
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS'; 
+
+col owner format a20
+col segment_type format a20
+col segment_name format a40
+col partition_name format a40
+
+col numobjs format 999999
+col mb format 99999999.99
+col init_mb format 9999.99
+col extents format 9999999
+
+compute sum of mb on report
+break on report
+
+ select owner, segment_type, count(1) numobjs, sum(bytes)/1024/1024 mb
+   from dba_segments
+  where tablespace_name = upper('$tablespace')
+   and $SEGOWNCLAUSE
+   and $SEGTYPECLAUSE
+  group by owner, segment_type
+  order by owner, segment_type;
+
+
+ select owner, segment_type, segment_name, partition_name, bytes/1024/1024 mb, initial_extent/1024/1024 init_mb, extents
+   from dba_segments
+  where tablespace_name = upper('$tablespace')
+   and $SEGOWNCLAUSE
+   and $SEGTYPECLAUSE
+  order by $ORDERBY ;
+
+
+" | sqlplus -s $SYSCONN@$DB
+
+

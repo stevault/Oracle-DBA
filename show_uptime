@@ -1,0 +1,27 @@
+DB=$ORACLE_SID
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+echo "
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+select *
+from v\$instance
+;
+
+" | sqlplus -s ${SYSCONN}@$DB

@@ -1,0 +1,79 @@
+
+cr_sess_stat () {
+
+echo "
+
+create table sess_mon
+as
+select sysdate cur_date_time,
+	p.spid, p.pid, s.sid, s.serial#, s.status,
+	p.pga_alloc_mem,
+	p.PGA_USED_MEM,
+	s.username,
+	s.osuser,
+	s.program
+   FROM v\$process p, v\$session s
+  WHERE s.paddr ( + ) = p.addr
+   AND 1=0
+/
+
+--    AND p.BACKGROUND is null /* Remove if need to monitor background processes */
+
+" | sqlplus -s awdba/awdba
+
+} 
+
+ins_sess_stat () {
+
+echo "
+
+set feedback off pages 0 
+
+insert into sess_mon
+select sysdate,
+	p.spid, p.pid, s.sid, s.serial#, s.status,
+	p.pga_alloc_mem,
+	p.PGA_USED_MEM,
+	s.username,
+	s.osuser,
+	s.program
+   FROM v\$process p, v\$session s
+  WHERE s.paddr ( + ) = p.addr;
+
+--    AND p.BACKGROUND is null /* Remove if need to monitor background processes */
+
+" | sqlplus -s awdba/awdba
+
+}
+
+
+SLEEPTIME=10
+ITERATIONS=10
+i=0
+
+while [ $# -ge 1 ]; do
+
+   opt=$1
+
+   case $opt  in
+     -s) shift; SLEEPTIME=$1 ; shift ;;
+     -i) shift; ITERATIONS=$1 ; shift ;;
+      *) echo "I don't know what $opt is."; exit 2;;
+   esac
+
+done
+
+
+## MAIN ()
+
+cr_sess_stat
+
+while [ $i -lt $ITERATIONS ]; do
+
+  let i=i+1
+  ins_sess_stat
+  sleep $SLEEPTIME 
+
+done
+
+

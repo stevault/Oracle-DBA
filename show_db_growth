@@ -1,0 +1,43 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+set pagesize 800
+select db_name, gather_month
+	, gb
+	, sixmoago
+	, round(100* (gb-sixmoago)/sixmoago,2) pct_change
+from (
+select 
+	 a.db_name, to_date(b.gather_month,'YYYYMM') gather_month
+	, round(sum(a.file_size)/1024,2) GB
+	, lag(round(sum(a.file_size)/1024,2) ,6,0) over (partition by db_name order by gather_month )  sixmoago
+	, count(1)
+from dbv_datafiles_trk a
+	, (select to_char(gather_date,'YYYYMM') gather_month, max(gather_date) max_gather_date from dbv_datafiles_trk
+	 group by to_char(gather_date,'YYYYMM')
+	 ) b
+where a.gather_date = b.max_gather_date
+  and a.db_name in ('os_prd','ca_prd','iv_prd','dw_prd')
+group by gather_month, db_name
+)
+where sixmoago != 0
+--and gather_month = to_char(sysdate,'YYYYMM')
+order by db_name, gather_month desc
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $DBVCONN

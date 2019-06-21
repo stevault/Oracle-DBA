@@ -1,0 +1,33 @@
+
+
+MVLOG=$1
+
+echo "
+
+
+ select sysdate, 'EXCL 4000', count(1), count(distinct m_row\$\$)
+    , count(1) - count(distinct m_row\$\$)
+ from (
+ select *
+  from dw_st.mlog\$_$MVLOG
+ where dmltype\$\$ = 'I'
+   and snaptime\$\$ >= to_date('06-JUL-2016 10:29:52','DD-MON-YYYY HH24:MI:SS')
+   and snaptime\$\$ < sysdate+10
+ order by m_row\$\$
+ )
+ union all
+ select sysdate, 'INCL 4000', count(1), count(distinct m_row\$\$)
+    , count(1) - count(distinct m_row\$\$)
+ from (
+ select *
+  from dw_st.mlog\$_$MVLOG
+ where dmltype\$\$ = 'I'
+   and snaptime\$\$ >= to_date('06-JUL-2016 10:29:52','DD-MON-YYYY HH24:MI:SS')
+ order by m_row\$\$
+)
+/
+
+" | sqlplus -s $SYSCONN
+
+
+

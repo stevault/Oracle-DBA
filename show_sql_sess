@@ -1,0 +1,14 @@
+DB=$ORACLE_SID
+
+SID=$1
+
+echo "
+
+ SELECT sql_text
+   FROM v\$sqlarea a, v\$session s
+  WHERE a.address = s.sql_address
+    AND s.SID =$SID
+/
+
+" | sqlplus -s $SYSCONN@$DB
+

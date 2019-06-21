@@ -1,0 +1,33 @@
+#!/bin/ksh
+
+if [ $# -lt 1 ]; then
+    echo "ERROR:  missing parameter JOB_CONN"
+    exit 2
+fi
+
+JOBCONN=$1
+shift
+
+if [ $# -ge 1 ]; then
+   ADDL_CRITERIA="$*"
+else
+   ADDL_CRITERIA="1=1"
+fi
+
+$ORACLE_HOME/bin/sqlplus -s '/ as sysdba' << EOF
+
+connect $JOBCONN
+show user
+
+col what format a90
+col interval format a20
+
+ select job, what, broken, last_date, last_sec, failures, interval
+   from dba_jobs
+  where $ADDL_CRITERIA
+  order by job
+/
+
+
+EOF
+

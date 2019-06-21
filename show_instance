@@ -1,0 +1,32 @@
+
+
+DB=$ORACLE_SID
+
+while [ $# -ge 1 ]; do
+
+   opt=$1
+
+   case $opt in
+     -d) shift; DB=$1; shift ;;
+      *) echo "I don't know what $opt is." ; exit 2;;
+   esac
+
+done
+
+CONN=${SYSCONN}@${DB}
+
+echo "
+
+col name format a45
+col time format a35
+col restore_point_time format a10
+col scn format 999999999999999
+col size_in_mb format 999,999
+col preserved format a12
+
+ select name, time, storage_size/1024/1024 size_in_mb, scn, guarantee_flashback_database, database_incarnation#, preserved, restore_point_time
+   from v\$restore_point;
+
+" | $ORACLE_HOME/bin/sqlplus -s $CONN
+
+

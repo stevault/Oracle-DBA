@@ -1,0 +1,89 @@
+
+DB=$ORACLE_SID
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+echo "
+
+set feedback off
+
+col memtyp format a20
+col p_value format 9,999,999,999,999
+col sp_value format 9,999,999,999,999
+col value format 9,999,999,999,999
+col name format a30
+
+break on report
+
+prompt ===============================================================================================
+prompt PARAMETERS
+
+select db.name, 'AMM' memtyp, p.name, to_number(p.value) p_value, to_number(sp.value) sp_value
+  from v\$spparameter sp, v\$parameter p, v\$database db
+ where p.name in ('memory_target', 'memory_max_target')
+   and sp.name = p.name
+/
+
+select db.name, 'ASMM' memtyp, p.name, to_number(p.value) p_value, to_number(sp.value) sp_value
+  from v\$spparameter sp, v\$parameter p, v\$database db
+ where p.name in ('sga_target', 'sga_max_size')
+   and sp.name = p.name
+order by p.name desc
+/
+
+select db.name, 'ASMM' memtyp, p.name, to_number(p.value) p_value, to_number(sp.value) sp_value
+  from v\$spparameter sp, v\$parameter p, v\$database db
+ where p.name in ('pga_aggregate_target')
+   and sp.name = p.name
+/
+
+compute sum of p_value on report
+compute sum of sp_value on report
+
+select db.name, 'MANUAL' memtyp, p.name, to_number(p.value) p_value, to_number(sp.value) sp_value
+  from v\$spparameter sp, v\$parameter p, v\$database db
+where p.name in ('db_cache_size', 'db_keep_cache_size', 'shared_pool_size', 'large_pool_size', 'java_pool_size', 'streams_pool_size','db_16k_cache_size')
+   and sp.name = p.name
+order by p.name
+/
+
+clear computes
+
+select db.name, 'MANUAL' memtyp, p.name, to_number(p.value) p_value, to_number(sp.value) sp_value
+  from v\$spparameter sp, v\$parameter p, v\$database db
+where p.name like '%area_size'
+   and sp.name = p.name
+order by p.name
+/
+
+prompt ===============================================================================================
+prompt ACTUAL STATS
+
+col name format a40
+ 
+select nvl(pool,'db_cache_size et al') pool, sum(bytes) value 
+from v\$sgastat
+group by pool
+order by pool
+/
+
+select *
+from v\$pgastat
+where name in ('aggregate PGA target parameter',
+		'aggregate PGA auto target',
+		'maximum PGA allocated',
+		'cache hit percentage')
+/
+
+
+" | sqlplus -s ${SYSCONN}@$DB
+

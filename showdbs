@@ -1,0 +1,38 @@
+#!/bin/ksh
+
+CHECKSTATUS=n
+
+OPTS=$*
+
+for Opt in $OPTS
+do
+
+  if [ $# -ge 1 ]; then
+     case $1 in 
+	-s|-S) CHECKSTATUS="Y" ;;
+	    *) echo "Unknown parameter."; exit 2;;
+     esac
+  fi 
+
+done
+
+grep -v '^#' /etc/oratab | grep -v '^+' | cut -d':' -f1 | while read SID
+do
+
+  ps -ef | grep "ora_dbw0_${SID}$" | grep -v grep | wc -l | read x
+
+  if [ ${x} -ge 1 ]; then
+     STATUS="running"
+  else
+     STATUS="DOWN"
+  fi
+
+  if [ "$CHECKSTATUS" = "Y" ]; then
+     echo "${SID} ${STATUS}" | awk '{ printf("%12s ...%12s\n",$1, $2) }'
+  else
+     [ "$STATUS" = "running" ] && echo $SID
+  fi
+
+done
+
+

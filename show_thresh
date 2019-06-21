@@ -1,0 +1,151 @@
+#!/bin/ksh
+###########################################################################
+# show_thresh
+#
+#  descrip:   show used/free space by tablespace for a given database
+#		including the maximum space which the tablespace can 
+#		potentially consume, after extending
+#   syntax:   show_thresh
+#  created:   3/9/2014
+#    
+#   revision history
+#      4/26/2017 (sjt) - added condition that by default excludes UNDO and TEMP tablespaces
+#				and (-a) flag to override and show all TS types
+#
+###########################################################################
+
+DB=$ORACLE_SID
+HTML=off
+SHOWDB=off
+HEADER=on
+PAGESIZE=70
+
+TYPECLAUSE="contents = 'PERMANENT'"
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+        -d) DB=$1; shift ;;
+   -showdb) SHOWDB=on;;
+     -html) HTML=on;;
+ -noheader) HEADER=off ; PAGESIZE=0 ;;
+        -a) TYPECLAUSE="1=1" ;;
+         *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+[ "$SHOWDB" = "on" ] && DBCOL="'${DB}' database," || DBCOL="" 
+
+if [ "$HTML" = "off" ]; then
+
+   if [ "$SHOWDB" = "on" ]; then
+      echo -e "DATABASE \c"
+   fi
+
+   echo 'TABLESPACE                                 USED              CURRENT SPACE USED                   POTENTIAL SPACE USED'
+
+   if [ "$SHOWDB" = "on" ]; then
+      echo -e "======== \c"
+   fi
+
+   echo "======================================= ============ ==================================== ===================================="
+
+fi
+
+echo "
+
+set feedback off serveroutput on 
+set pagesize $PAGESIZE
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS'; 
+
+compute sum of mb on report
+
+col database format a8
+col numfiles format 9999
+
+compute sum of file_mb on report
+compute sum of used_mb on report
+compute sum of free_mb on report
+
+compute sum of pfile_mb on report
+compute sum of pused_mb on report
+compute sum of pfree_mb on report
+
+break on report
+
+col file_mb format 999,999,999
+col used_mb format 999,999,999
+col free_mb format 999,999,999
+col free_pct format 999999.99
+
+col pfile_mb format 999,999,999
+col pused_mb format 999,999,999
+col pfree_mb format 999,999,999
+col pfree_pct format 999999.99
+
+col unalloc_mb format 999,999,999
+
+col MBmaxTOT format 999,999,999
+
+col largest_segment_m format 999,999,999
+col largest_nextext_m format 999,999,999
+col largest_freeseg_m format 999,999,999
+
+set markup html $HTML
+
+select ${DBCOL}
+	a.ts ts_name
+	, numfiles
+--
+	, round(u.mbused,2) used_mb
+--
+	, round(a.mbcurtot,2) file_mb
+	, round(f.mbfree,2) free_mb
+	, round(100 * f.mbfree / a.mbcurtot,2) free_pct
+--
+	, round(u.mbused + f.mbfree + a.mbunalloc,2) pfile_mb
+	, round(f.mbfree + a.mbunalloc,2) pfree_mb
+	, round(100*(f.mbfree + a.mbunalloc) / (u.mbused + f.mbfree + a.mbunalloc),4) pfree_pct
+--	, round(a.mbunalloc,2) unalloc_mb
+	--
+--	, largest_segment_m
+--	, largest_nextext_m
+--	, largest_freeseg_m
+from
+	(select tablespace_name ts
+		, sum(bytes)/1024/1024 mbfree
+		, max(bytes)/1024/1024 largest_freeseg_m
+	   from dba_free_space
+	  group by tablespace_name) f,
+	(select tablespace_name ts
+		, sum(bytes)/1024/1024 mbused
+		, max(bytes/1024/1024) largest_segment_m
+		, max(next_extent/1024/1024) largest_nextext_m
+	   from dba_segments
+	  group by tablespace_name) u,
+	(select tablespace_name ts
+		, count(1) numfiles
+		, sum(decode(autoextensible,'NO',bytes,maxbytes)-bytes)/1024/1024 mbunalloc
+		, sum(bytes)/1024/1024 mbcurtot
+	   from dba_data_files
+	  group by tablespace_name
+	union all
+	 select tablespace_name ts
+		, count(1) numfiles
+		, sum(decode(autoextensible,'NO',bytes,maxbytes)-bytes)/1024/1024 mbunalloc
+		, sum(bytes)/1024/1024 mbcurtot
+	   from dba_temp_files
+	  group by tablespace_name) a
+	, dba_tablespaces ts
+  where a.ts = f.ts (+)
+    and a.ts = u.ts (+)
+    and a.ts = ts.tablespace_name
+    and $TYPECLAUSE
+  order by pfree_pct asc ;
+
+" | sqlplus -s $SYSCONN@$DB
+

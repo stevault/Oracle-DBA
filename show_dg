@@ -1,0 +1,48 @@
+
+if [ $# -lt 4 ]; then
+   echo "ERROR:  missing parameter(s)."
+   echo "SYNTAX:  $0 -p <primary db> -s <standby db>"
+   exit 2
+fi
+
+DB=$ORACLE_SID
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+     -p) PRIMARY=$1; shift ;;
+     -s) STANDBY=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+
+echo "
+
+show database $PRIMARY LogXptStatus
+
+show database verbose $PRIMARY
+
+show database verbose $STANDBY
+
+show configuration verbose
+
+
+" | $ORACLE_HOME/bin/dgmgrl $SYSCONN@$DB 
+
+if [ $? -ne 0 ]; then
+   echo "The data guard configuration check failed for $PRIMARY"
+   exit 1
+fi
+
+exit 0
+

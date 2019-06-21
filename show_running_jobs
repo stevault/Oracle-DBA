@@ -1,0 +1,18 @@
+
+
+echo "
+
+set feedback 20
+
+ select
+	owner,
+	job_name
+	--*
+	--job_name, job_type, job_class, state, enabled, last_start_date
+   from dba_scheduler_jobs
+  where state = 'RUNNING'
+    and job_name like 'PURGE%'
+/
+
+" | sqlplus -s $SYSCONN
+

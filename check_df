@@ -1,0 +1,32 @@
+THRESHOLD=85
+
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+-thresh) THRESHOLD=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+retcode=0
+df -P | while read a b c d e f g
+do
+   Cap=`echo $e | sed 's;%;;'`
+   if [ $Cap -gt $THRESHOLD ]; then
+     echo "$f is running out of space ($e used)"
+     retcode=1
+   fi
+done
+
+exit $retcode
+

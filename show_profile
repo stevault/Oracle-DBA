@@ -1,0 +1,45 @@
+
+DB=$ORACLE_SID
+
+if [ $# -lt 1 ]; then
+   echo "ERROR: missing parameter."
+   echo "SYNTAX: $0 <username>"
+   exit 2
+fi
+
+PROFILE=$1 
+shift
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+echo "
+
+col resource_name format a35
+col defalt format a15
+col profile format a15
+col limit format a35
+
+
+
+prompt PROFILES
+select p.profile, p.resource_type, p.resource_name, p.limit
+	, case when p.limit = 'DEFAULT' then def.limit else null end DEfalt
+from
+(select * from dba_profiles where profile = 'DEFAULT') def,
+(select * from dba_profiles where upper(profile) = upper('$PROFILE')) p
+where def.resource_Name = p.resource_name
+order by resource_type, resource_name
+/
+
+" | sqlplus -s ${SYSCONN}@$DB
+
+
