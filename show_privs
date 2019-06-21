@@ -1,0 +1,75 @@
+
+########################################################################################
+show_grantee_privs () {
+
+p_GRANTEECLAUSE=$1 
+
+echo "
+
+select owner
+	, sum(decode(privilege,'SELECT',1,0)) select_priv
+	, sum(decode(privilege,'INSERT',1,0)) insert_priv
+	, sum(decode(privilege,'UPDATE',1,0)) update_priv
+	, sum(decode(privilege,'DELETE',1,0)) DELETE_priv
+	, sum(decode(privilege,'SELECT',0,'UPDATE',0,'INSERT',0,'DELETE',0,1)) other_priv
+	, count(1) 
+ from dba_tab_privs
+where $p_GRANTEECLAUSE
+group by owner
+/
+
+" | sqlplus -s $SYSCONN@$DB
+
+}
+
+########################################################################################
+show_schema_privs () {
+
+p_OWNERCLAUSE=$1
+
+
+echo "
+
+select grantee
+	, sum(decode(privilege,'SELECT',1,0)) select_priv
+	, sum(decode(privilege,'INSERT',1,0)) insert_priv
+	, sum(decode(privilege,'UPDATE',1,0)) update_priv
+	, sum(decode(privilege,'DELETE',1,0)) DELETE_priv
+	, sum(decode(privilege,'SELECT',0,'UPDATE',0,'INSERT',0,'DELETE',0,1)) other_priv
+	, count(1) 
+ from dba_tab_privs
+where $p_OWNERCLAUSE
+group by grantee
+/
+
+" | sqlplus -s $SYSCONN@$DB
+
+} 
+
+########################################################################################
+########################################################################################
+
+DB=$ORACLE_SID
+OWNERCLAUSE="1=1"
+GRANTEECLAUSE="1=1"
+
+if [ $# -lt 1 ]; then
+   echo "ERROR:  missing parameter"
+   echo "SYNTAX:  $0 [ -d <database> ] [ -owner <owner> | all ] [ -grantee <segment_type> | all ]"
+   exit 2
+fi
+
+while [ $# -ge 1 ]; do
+
+   opt=$1
+ 
+   case $opt in 
+            -d) shift; DB=$1; shift;;
+        -owner) shift; OWNERCLAUSE="owner = upper('$1')"; shift ; show_schema_privs "$OWNERCLAUSE" ; exit ;;
+      -grantee) shift; GRANTEECLAUSE="grantee = upper('$1')"; shift  ; show_grantee_privs "$GRANTEECLAUSE" ; exit ;;
+             *) echo "I don't know what $opt is..."; exit 2;;
+   esac
+
+done
+
+

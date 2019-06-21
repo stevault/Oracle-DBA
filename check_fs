@@ -1,0 +1,43 @@
+
+
+ID=`id | cut -d')' -f1 | cut -d'(' -f2`
+echo $ID
+
+if [ $ID != 'root' ]; then
+   echo "sudo $0 $*"
+   exit $? 
+fi
+
+DIR=`pwd`
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+   -dir) DIR=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+
+for dir in $DIR/*
+do 
+
+  case $dir in 
+         /u01) break ;;
+        /boot) break ;;
+         /mnt) break ;;
+   /cloudsfs1) break ;;
+   /odadatafs) break ;;
+         /u02) break ;;
+            *) du $dir 2>/dev/null | sort -nr | tail -2 ;;
+  esac
+
+done

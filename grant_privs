@@ -1,0 +1,60 @@
+
+SCHEMA=tmp
+PRIVILEGE=none
+GRANTEE=me
+BASE=`basename $0`
+TMPSCRIPT=/var/tmp/${BASE}$$.sql
+OBJECT_NAME=all
+
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+     -s) SCHEMA=$1 ; shift ;;
+     -g) GRANTEE=$1 ; shift ;;
+   -obj) OBJECT_NAME=$1; shift ;;
+    -ro) PRIVILEGE=SELECT ;;
+    -rw) PRIVILEGE="SELECT,UPDATE,INSERT,DELETE" ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+echo "Granting $PRIVILEGE on tables/views in $DB, owned by $SCHEMA to $GRANTEE..."
+
+echo "
+#set linesize 200 pagesize 0 feedback off verify off
+
+select 'GRANT $PRIVILEGE ON $SCHEMA.' || object_name || ' TO $GRANTEE;'
+  from dba_objects
+ where owner = upper('$SCHEMA')
+   and object_type in ('TABLE','VIEW')
+   and (object_name = '$OBJECT_NAME' or '$OBJECT_NAME' = 'all')
+   and ('$PRIVILEGE' = 'SELECT' or '$PRIVILEGE' = 'SELECT,UPDATE,INSERT,DELETE')
+union all
+select 'GRANT SELECT ON $SCHEMA.' || object_name || ' TO $GRANTEE;'
+  from dba_objects
+ where owner = upper('$SCHEMA')
+   and object_type in ('SEQUENCE')
+   and (object_name = '$OBJECT_NAME' or '$OBJECT_NAME' = 'all')
+   and ('$PRIVILEGE' = 'SELECT' or '$PRIVILEGE' = 'SELECT,UPDATE,INSERT,DELETE')
+;
+
+" | sqlplus -s $SYSCONN@$DB > $TMPSCRIPT
+
+ls -l $TMPSCRIPT 
+cat $TMPSCRIPT | sqlplus -s $SYSCONN@$DB
+
+find /var/tmp -name ${BASE} -mtime +14 -exec ls -l {} \;
+#find /var/tmp -name ${BASE} -mtime +14 -exec rm  {} \;
+

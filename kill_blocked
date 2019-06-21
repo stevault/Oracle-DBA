@@ -1,0 +1,129 @@
+
+DB=$ORACLE_SID
+THRESHOLD=600
+DONTKILL=Y
+ORAPWD="&&whats_my_password"
+
+#######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+   -pwd) ORAPWD=$1; shift ;;
+     -t) THRESHOLD=$1; shift ;;
+  -doit) DONTKILL=N;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+#######################################################
+
+build_sql()  {
+
+echo "
+
+set define off
+set feedback off
+
+col ord noprint
+
+set pages 0
+
+prompt whenever sqlerror exit sql.sqlcode
+prompt whenever oserror exit 
+
+select distinct 'connect awdba/$ORAPWD@' || i.instance_name
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+   and i.instance_number = 1
+/
+
+select distinct
+	'--killing ' || bs.sid || ',' || bs.serial#
+|| ',' || bs.USER#
+|| ',' || bs.USERNAME
+|| ',' --|| bs.COMMAND
+|| ',' --|| bs.OWNERID
+|| ',' --|| bs.TADDR
+|| ',' || bs.LOCKWAIT
+|| ',' || bs.STATUS
+|| ',' --|| bs.SERVER
+|| ',' --|| bs.SCHEMA#
+|| ',' --|| bs.SCHEMANAME
+|| ',' || bs.OSUSER
+|| ',' || bs.PROCESS
+|| ',' || bs.MACHINE
+|| ',' || bs.PORT
+|| ',' || bs.TERMINAL
+|| ',' || bs.PROGRAM
+|| ',' || bs.TYPE 
+|| ',' || chr(10) ||
+	'alter system kill session ''' || bs.sid || ',' || bs.serial# || ''';'
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+   and i.instance_number = 1
+/
+
+-- BLOCKING_INSTANCE                                                                                                       NUMBER
+-- BLOCKING_SESSION                                                                                                        NUMBER
+
+select distinct 'connect awdba/$ORAPWD@' || i.instance_name
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+   and i.instance_number = 2
+/
+
+select distinct
+	'--killing ' || bs.sid || ',' || bs.serial# || bs.username
+|| bs.USER#
+|| bs.USERNAME
+--|| bs.COMMAND
+--|| bs.OWNERID
+--|| bs.TADDR
+|| bs.LOCKWAIT
+|| bs.STATUS
+--|| bs.SERVER
+--|| bs.SCHEMA#
+--|| bs.SCHEMANAME
+|| bs.OSUSER
+|| bs.PROCESS
+|| bs.MACHINE
+|| bs.PORT
+|| bs.TERMINAL
+|| bs.PROGRAM
+|| bs.TYPE 
+	|| chr(10) ||
+	'alter system kill session ''' || bs.sid || ',' || bs.serial# || ''';'
+  from gv\$session s, gv\$instance i, gv\$session bs
+ where s.blocking_session = bs.sid
+   and s.blocking_instance = bs.inst_id
+   and s.inst_id = i.inst_id
+   and s.seconds_in_wait > $THRESHOLD
+   and i.instance_number = 2
+/
+
+" | sqlplus -s ${SYSCONN}@$DB
+}
+
+if [ $DONTKILL = 'N' ]; then
+   build_sql | sqlplus -s awdba@$DB
+else
+   build_sql
+fi
+
+
+   
+

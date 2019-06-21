@@ -1,0 +1,192 @@
+
+DB=$ORACLE_SID
+
+if [ $# -lt 1 ]; then
+   echo "ERROR: missing parameter."
+   echo "SYNTAX: $0 <username>"
+   exit 2
+fi
+
+USR=`echo $1 | awk '{ print(toupper($1)) }'`
+shift
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#######################################################
+# SET GLOBAL PARAMETERS
+
+SCRIPT_DIR=/cloudsfs1/jenkins
+TSTAMP=`date +%Y%m%d_%H%M`
+BACKUPBASE=/mnt/oda_backups
+
+#######################################################
+
+P1_InstanceName=$DB
+P2_ExportType=EXP_SCHEMA
+
+EXPDP_script=$SCRIPT_DIR/${P2_ExportType}.par
+
+BACKUPDIR=${BACKUPBASE}/${DB}/exp
+EXPDP_dir=expdir
+EXPDP_base=${DB}_${USR}_${TSTAMP}
+EXPDPFILE=${EXPDP_dir}:${EXPDP_base}.dmp
+EXPDP_log=${EXPDP_dir}:${EXPDP_base}.log
+DMPFILE=${BACKUPDIR}/${EXPDP_base}.dmp
+DMPLOG=${BACKUPDIR}/${EXPDP_base}.log
+SQLFILE=${BACKUPDIR}/${EXPDP_base}.sql
+TARFILE=${BACKUPDIR}/${EXPDP_base}.tar
+ZIPFILE=${BACKUPDIR}/${EXPDP_base}.zip
+
+export NLS_DATE_FORMAT="DD-MON-YYYY HH24:MI:SS"
+
+#######################################################
+#######################################################
+
+echo "### Starting $USR backup to $SQLFILE ..."
+
+echo "
+
+ -----------------------------------------------------------------------------------
+-- File Name    : https://oracle-base.com/dba/script_creation/user_ddl.sql
+-- Author       : Tim Hall
+-- Description  : Displays the DDL for a specific user.
+-- Call Syntax  : @user_ddl (username)
+-- Last Modified: 28/01/2006
+-- -----------------------------------------------------------------------------------
+
+set long 20000 longchunksize 20000 pagesize 0 linesize 1000 feedback off verify off trimspool on
+column ddl format a1000
+
+begin
+   dbms_metadata.set_transform_param (dbms_metadata.session_transform, 'SQLTERMINATOR', true);
+   dbms_metadata.set_transform_param (dbms_metadata.session_transform, 'PRETTY', true);
+end;
+/
+ 
+variable v_username VARCHAR2(30);
+
+exec:v_username := upper('$USR');
+
+select dbms_metadata.get_ddl('USER', u.username) AS ddl
+from   dba_users u
+where  u.username = :v_username
+union all
+select dbms_metadata.get_granted_ddl('TABLESPACE_QUOTA', tq.username) AS ddl
+from   dba_ts_quotas tq
+where  tq.username = :v_username
+and    rownum = 1
+union all
+select dbms_metadata.get_granted_ddl('ROLE_GRANT', rp.grantee) AS ddl
+from   dba_role_privs rp
+where  rp.grantee = :v_username
+and    rownum = 1
+union all
+select dbms_metadata.get_granted_ddl('SYSTEM_GRANT', sp.grantee) AS ddl
+from   dba_sys_privs sp
+where  sp.grantee = :v_username
+and    rownum = 1
+union all
+select dbms_metadata.get_granted_ddl('OBJECT_GRANT', tp.grantee) AS ddl
+from   dba_tab_privs tp
+where  tp.grantee = :v_username
+and    rownum = 1
+union all
+select dbms_metadata.get_granted_ddl('DEFAULT_ROLE', rp.grantee) AS ddl
+from   dba_role_privs rp
+where  rp.grantee = :v_username
+and    rp.default_role = 'YES'
+and    rownum = 1
+union all
+select to_clob('/* Start profile creation script in case they are missing') AS ddl
+from   dba_users u
+where  u.username = :v_username
+and    u.profile <> 'DEFAULT'
+and    rownum = 1
+union all
+select dbms_metadata.get_ddl('PROFILE', u.profile) AS ddl
+from   dba_users u
+where  u.username = :v_username
+and    u.profile <> 'DEFAULT'
+union all
+select to_clob('End profile creation script */') AS ddl
+from   dba_users u
+where  u.username = :v_username
+and    u.profile <> 'DEFAULT'
+and    rownum = 1
+
+spool $SQLFILE
+/
+spool off
+
+" | $ORACLE_HOME/bin/sqlplus -s ${SYSCONN}@$DB
+
+echo "### Finished $USR backup"
+#######################################################
+#######################################################
+
+###############
+# verify that backup script exists
+
+if [ ! -f $EXPDP_script ]; then
+   echo "$EXPDP_script does not exist."
+   echo "Check parameter 2 - backup_type: $P2_ExportType"
+   exit 2
+fi
+
+#######################################################
+# DEFINE LOCAL PROCEDURES
+
+sp_CleanupExit () { 
+
+echo $1
+exit $2 
+
+}
+
+spRecreateExpDir () {
+echo "
+whenever sqlerror exit sql.sqlcode
+whenever oserror exit oscode
+create or replace directory ${EXPDP_dir} as '$BACKUPDIR';
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@${P1_InstanceName} as sysdba
+
+}
+
+#######################################################
+# Main 
+
+mkdir --parents $BACKUPDIR
+
+spRecreateExpDir ${BACKUPDIR}
+
+echo "### Starting $USR export to $DMPFILE ..."
+$ORACLE_HOME/bin/expdp USERID=$SYSCONN@${P1_InstanceName} parfile=${EXPDP_script} dumpfile=${EXPDPFILE} logfile=${EXPDP_log} schemas=$USR
+
+retcode=$?
+
+if [ $retcode -ne 0 ]; then
+   cat $DMPLOG
+   sp_CleanupExit "Export failed" $retcode
+fi
+
+echo "### Finished $USR export" 
+#######################################################
+#######################################################
+# cleanup and exit
+
+rm -f $TARFILE
+tar cvfz $TARFILE $DMPFILE $DMPLOG $SQLFILE
+[ $? -eq 0 ] && rm $DMPFILE $DMPLOG $SQLFILE
+ls -l $TARFILE
+
+sp_CleanupExit "Successful backup of $USR schema." 0
+

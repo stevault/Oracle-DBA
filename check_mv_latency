@@ -1,0 +1,16 @@
+DB=$ORACLE_SID
+
+
+
+
+echo "
+
+select owner, master_owner, to_char(trunc(sysdate)-trunc(last_refresh),'9999') || ' days since last refresh' , count(1)
+from dba_snapshots
+where owner = 'WH_ST'
+group by owner, master_owner, trunc(sysdate)-trunc(last_refresh)
+order by owner, master_owner, trunc(sysdate)-trunc(last_refresh);
+
+" | $ORACLE_HOME/bin/sqlplus -s awdba/awdba@$DB
+
+

@@ -1,0 +1,26 @@
+#!/bin/ksh
+
+DB=$ORACLE_SID
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+. oraset $DB
+
+$ORACLE_HOME/bin/rman target / @/cloudsfs1/jenkins/RMAN_ARCH.rcv
+
+
+

@@ -1,0 +1,43 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+set feedback off
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+SELECT
+   mview_name,
+   last_refresh_date "START_TIME",
+   CASE
+      WHEN fullrefreshtim <> 0 THEN
+         LAST_REFRESH_DATE + fullrefreshtim/60/60/24
+      WHEN increfreshtim <> 0 THEN
+         LAST_REFRESH_DATE + increfreshtim/60/60/24
+      ELSE
+         LAST_REFRESH_DATE
+   END "END_TIME",
+   fullrefreshtim,
+   increfreshtim
+   , fullrefreshtim+ increfreshtim totref
+FROM all_mview_analysis
+WHERE owner='WH_ST'
+ and last_refresh_date > trunc(sysdate)
+order by totref;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

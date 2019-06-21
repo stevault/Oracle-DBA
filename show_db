@@ -1,0 +1,67 @@
+#!/bin/ksh
+
+LOCALHOST=`hostname`
+HOST=$LOCALHOST
+DB="$ORACLE_SID"
+BASE=`basename $0`
+FULLPATH=`which $0`
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -h) HOST=$1; shift ;;
+     -d) DB="$1"; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+ case $HOST in 
+    $LOCALHOST)  ;;
+             *)  ssh $HOST "$FULLPATH $*" ; exit $?;; 
+ esac
+
+######################################################
+# PRINT THE HEADER
+
+echo DB PROCESS ORATAB STATUS STARTUP | awk '{ printf("%-10s%-10s%-60s%-12s%-25s\n",$1,$2,$3,$4,$5) }'
+echo ======== ======== ======== ======== ======== | awk '{ printf("%-10s%-10s%-60s%-12s%-25s\n",$1,$2,$3,$4,$5) }'
+
+
+show_db_func () {
+
+DB=$1
+echo $DB | awk '{ printf("%-10s",$1) }' 
+
+######################################################
+# CHECK THE UNIX PROCESS
+
+ps -ef | grep "ora_dbw0_${DB}" | grep -v grep | awk '{ printf("%-10s",$2) }' 
+
+######################################################
+# VERIFY THE EXISTENCE OF AN ORATAB ENTRY
+
+grep "^$DB" /etc/oratab | awk '{ printf("%-60s",$1) }'
+
+######################################################
+# VERIFY THE EXISTENCE OF AN ORATAB ENTRY 
+
+echo "set pagesize 0 feedback off trimspool on
+select open_mode from v\$database;" | sqlplus -s ${SYSCONN}@${DB} | awk '{ printf("%-12s",$1) }'
+
+echo "set pagesize 0 feedback off trimspool on
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+select startup_time from v\$instance;" | sqlplus -s ${SYSCONN}@${DB} | awk '{ printf("%-25s\n",$1) }'
+
+}
+
+for db in $DB
+do
+    show_db_func $db
+done
+

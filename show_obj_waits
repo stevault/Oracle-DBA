@@ -1,0 +1,35 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+
+TIM="(1/24)"
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+  -time) TIM=$1 ; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+col total_wait_time format 999,999,999,999
+
+select o.owner, o.object_name, o.object_type, sum(h.wait_time + h.time_waited)/100 total_wait_sec
+from v\$active_session_history h, dba_objects o, v\$event_name e
+where h.sample_time between sysdate-($TIM) and sysdate
+and h.current_obj# = o.object_id
+and e.event_id = h.event_id
+and e.wait_class <> 'idle'
+group by o.owner, o.object_name, o.object_type
+order by 4 desc
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

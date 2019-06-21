@@ -1,0 +1,46 @@
+
+DB=$ORACLE_SID
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+echo "
+
+
+SET PAGESIZE 66;
+SET LINESIZE 80;
+
+REPHEADER PAGE CENTER 'Flash Recovery Area Usage';
+
+COLUMN FILE_TYPE FORMAT a20;
+COLUMN FILE_TYPE HEADING 'File Type';
+
+COLUMN USED_MB HEADING 'Used MBytes';
+COLUMN USED_MB FORMAT 9999999.99;
+COLUMN RECLAIMABLE_MB HEADING 'Reclaimable Mbytes';
+COLUMN RECLAIMABLE_MB FORMAT 9999999.99;
+
+COLUMN NUMBER_OF_FILES HEADING 'Number of files';
+
+BREAK ON REPORT
+COMPUTE SUM LABEL 'Totals:' OF USED_MB RECLAIMABLE_MB ON REPORT;
+
+SELECT
+  rau.file_type,
+  rfd.space_used * rau.percent_space_used / 1024 / 1024 as USED_MB,
+  rfd.space_reclaimable * rau.percent_space_reclaimable / 1024 / 1024 as RECLAIMABLE_MB,
+  rau.number_of_files as NUMBER_OF_FILES
+FROM
+  v\$recovery_file_dest rfd, v\$flash_recovery_area_usage rau;
+
+" | sqlplus -s ${SYSCONN}@$DB
+
+

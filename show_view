@@ -1,0 +1,28 @@
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameter - view_name."
+   exit 1
+fi
+
+OBJECT=`echo -e $1 | awk '{ print(toupper($1)) }'`
+
+$ORACLE_HOME/bin/sqlplus -s '/ as sysdba' << EOF
+col owner format a13
+col view_name format a40
+col column_name format a40
+
+set long 99999
+
+ select 
+	*
+   from dba_views t, dba_objects o
+  where view_name = upper('$OBJECT')
+    and t.owner = o.owner
+    and t.view_name = o.object_name
+    and o.object_type = 'VIEW' ;
+
+
+EOF
+
+
+

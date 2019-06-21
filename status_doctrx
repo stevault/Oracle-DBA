@@ -1,0 +1,61 @@
+. /cloudsfs1/jenkins/OracleEnv.h
+. /home/oracle/awdba/.sh_common
+
+DB=$ORACLE_SID
+THRESHOLD=5
+
+
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+echo "
+
+set feedback off serveroutput on
+
+declare
+  v_cnt number(2) := 0;
+  DOCUMENTS_STUCK EXCEPTION;
+  pragma exception_init(DOCUMENTS_STUCK,-5555);
+
+begin
+
+ select count(1)
+   into v_cnt
+   from dw_st.dw_document_trx
+  where start_time > trunc(sysdate)
+    and status not in ( 'COMPLETE','HOLD');
+
+ dbms_output.put_line(v_cnt || ' docs in the queue');
+
+ if (v_cnt > $THRESHOLD) then
+    raise DOCUMENTS_STUCK;
+ end if;
+
+exception
+   when DOCUMENTS_STUCK then raise;
+   when others then raise;
+
+end;
+/
+
+
+"# | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+
+if [ $? -ne 0 ]; then
+   exit 1
+fi
+

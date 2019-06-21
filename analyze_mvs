@@ -1,0 +1,131 @@
+
+EXPDIR=/mnt/oda_backups/DW_ST/exp/
+ETFILEname=analyze_mvs.dat
+ETFILE=$EXPDIR/$ETFILEname
+ETTAB=et_collected_mvstats
+CAPTURE_DATE=`date '+%Y%m%d%H%M%S'`
+
+#############################################################################
+generate_etfile() {
+
+rm -f $ETFILE
+
+for db in $DWDBS
+do
+
+echo "
+
+set pagesize 0 feedback off 
+
+ select '$CAPTURE_DATE' || ',' || '$db' || ',' || mview_name
+	|| ',' || to_char(last_refresh_date,'DD-MON-YYYY HH24:MI:SS') || ',' || fullrefreshtim || ',' || incRefreshtim
+   from user_mview_analysis
+-- where last_refresh_date > sysdate-30;
+/
+
+" | sqlplus -s $DWMVCONN@$db
+
+done > $ETFILE
+
+}
+
+
+#############################################################################
+crosstab_query() {
+
+echo "
+set lines 400
+
+ select
+	capture_date, mview_name
+	--
+	, max(decode(db, 'dw_prd', lastrefreshdte, null)) prd_refdate
+	, sum(decode(db, 'dw_prd', fullrefreshtim, 0)) prd_fulltim
+	, sum(decode(db, 'dw_prd', increfreshtim, 0)) prd_incrtim
+	--
+	, max(decode(db, 'dw_st', lastrefreshdte, null)) st_refdate
+	, sum(decode(db, 'dw_st', fullrefreshtim, 0)) st_fulltim
+	, sum(decode(db, 'dw_st', increfreshtim, 0)) st_incrtim
+	--
+	, max(decode(db, 'dw_uat', lastrefreshdte, null)) uat_refdate
+	, sum(decode(db, 'dw_uat', fullrefreshtim, 0)) uat_fulltim
+	, sum(decode(db, 'dw_uat', increfreshtim, 0)) uat_incrtim
+	--
+	, max(decode(db, 'dw_qa', lastrefreshdte, null)) qa_refdate
+	, sum(decode(db, 'dw_qa', fullrefreshtim, 0)) qa_fulltim
+	, sum(decode(db, 'dw_qa', increfreshtim, 0)) qa_incrtim
+	--
+	, max(decode(db, 'dw_dev', lastrefreshdte, null)) dev_refdate
+	, sum(decode(db, 'dw_dev', fullrefreshtim, 0)) dev_fulltim
+	, sum(decode(db, 'dw_dev', increfreshtim, 0)) dev_incrtim
+	--
+  from awdba.$ETTAB
+ group by 
+	capture_date, mview_name
+ order by 
+	capture_date, mview_name
+/
+
+" | sqlplus -s $SYSCONN@dw_st
+
+}
+
+#############################################################################
+create_etable () {
+
+echo "
+
+drop table $ETTAB;
+
+	--BADFILE et_${ETTAB}.bad
+	--LOGFILE et_${ETTAB}.log
+
+create table $ETTAB
+(
+	capture_date	varchar2(20),
+	db		varchar2(10),
+	mview_name	varchar2(50),
+	lastrefreshdte	varchar2(20),
+	fullrefreshtim	number,
+	increfreshtim	number
+)
+ORGANIZATION EXTERNAL
+(
+ TYPE oracle_loader 
+ DEFAULT DIRECTORY EXPDIR
+ ACCESS PARAMETERS
+ (
+    RECORDS DELIMITED BY NEWLINE
+	FIELDS TERMINATED BY \",\" OPTIONALLY ENCLOSED BY '\"' 
+	LRTRIM
+	MISSING FIELD VALUES ARE NULL
+ ) 
+ LOCATION ('$ETFILEname')
+)
+  
+/
+
+exit
+
+--CAPTURE_DATE=`date '+%Y%m%d%H%M%S'`
+
+--	(
+--	capture_date	char(255),
+--	db		char(255),
+--	mview_name	char(255),
+--	lastrefreshdte	char(255),
+--	fullrefreshtim	char(255),
+--	increfreshtim	char(255)
+--	)
+
+" | sqlplus -s $SYSCONN@dw_st
+
+}
+  
+#############################################################################
+#############################################################################
+
+generate_etfile
+create_etable 
+crosstab_query
+

@@ -1,0 +1,79 @@
+$env = "PROD"
+
+$workingDir = $Env:bamboo_build_working_directory
+$commitHash = $(git show :/^Merge | Select-String -Pattern "^Merge: " | Out-String -Width 25).substring(9,15).replace(' ','...')
+$sourceFiles = git diff $commitHash --name-only --diff-filter=d
+
+Write-Host "Updated files:"
+Write-Host $sourceFiles
+
+#Create a build directory
+$yyyyMMdd_hhmmss = Get-Date -format "yyyyMMdd_HHmmss"
+New-Item C:\build\$env\qlikview\$yyyyMMdd_hhmmss -type directory -force
+
+$targetDir = "C:\build\$env\qlikview\" + $yyyyMMdd_hhmmss
+
+Foreach($file in $sourceFiles) {
+    $targetDir = "C:\build\$env\qlikview\" + $yyyyMMdd_hhmmss
+    $dirs = $file.split("/")
+    foreach($dir in $dirs) {
+        Write-Host $dir
+        if ($dir.Substring($dir.Length - 3) -ne "qvw") {
+            $targetDir += "\"+$dir
+            New-Item $targetDir -type directory -force
+        } else {
+            Copy-Item $file -destination $targetDir
+        }
+        
+    }
+}
+
+$files = @(("QlikView Source Documents/Performance Dashboard.qvw","\\dashboard\D$\QlikView Source Documents\Performance Dashboard.qvw"),
+("QlikView Source Documents/Performance Dashboard.qvw","\\dashboard\D$\QlikView Source Documents\Performance Dashboard (M-E).qvw"),
+("QlikView Source Documents/PL Dashboard.qvw","\\dashboard\D$\QlikView Source Documents\PL Dashboard.qvw"),
+("QlikView Source Documents/OASIS.qvw","\\dashboard\D$\QlikView Source Documents\OASIS.qvw"),
+("QlikView Source Documents/GM OASIS.qvw","\\dashboard\D$\QlikView Source Documents\GM OASIS.qvw"),
+("QlikView Source Documents/BrokerHeatMap.qvw","\\dashboard\D$\QlikView Source Documents\BrokerHeatMap.qvw"),
+("QlikView Generators/QVD_Dashboard_Performance_Data.qvw","\\dashboard\D$\QlikView Generators\Production\Performance Dashboard\QVD_Dashboard_Performance_Data.qvw"),
+("QlikView Generators/QVD_Dashboard_Security.qvw","\\dashboard\D$\QlikView Generators\Production\Shared\QVD_Dashboard_Security.qvw"))
+
+$targetDir = "C:\build\$env\qlikview\" + $yyyyMMdd_hhmmss			
+
+$i = 0			
+Foreach($file in $files) {
+	$source = ($targetDir + '\' + $file[0].replace('/','\')).Trim()
+	Write-Host $targetDir
+	Write-Host $source
+	Write-Host $file[0]
+	Write-Host $file[1]
+	Write-Host (Test-Path $source)
+	if (Test-Path $source) {
+		Move-Item $source $file[1] -force
+		
+		if ($file[0] -eq "QlikView Source Documents/BrokerHeatMap.qvw") {
+		    Write-Host "Running Broker Heat Map publisher..."
+		    & '\\etl\d$\DashboardAdminConsoleEDX\Release\DashboardAdminConsoleEDX.exe'  "Broker Heat Map"
+		    Write-Host $LASTEXITCODE
+	    }
+	    if ($file[0] -eq "QlikView Source Documents/GM OASIS.qvw") {
+	        Write-Host "Running GM Oasis publisher..."
+		    & '\\etl\d$\DashboardAdminConsoleEDX\Release\DashboardAdminConsoleEDX.exe'  "GM Oasis"
+		    Write-Host $LASTEXITCODE
+	    }
+	    if ($file[0] -eq "QlikView Source Documents/OASIS.qvw") {
+	        Write-Host "Running Oasis publisher..."
+	        & '\\etl\d$\DashboardAdminConsoleEDX\Release\DashboardAdminConsoleEDX.exe'  "Oasis"
+	        Write-Host $LASTEXITCODE
+	    }
+	    
+	    if($i -eq 0 -and ($file[0] -eq ("QlikView Source Documents/Performance Dashboard.qvw") `
+        	-or $file[0] -eq ("QlikView Generators/QVD_Dashboard_Performance_Data.qvw") `
+        	-or $file[0] -eq ("QlikView Source Documents/PL Dashboard.qvw") `
+        	-or $file[0] -eq ("QlikView Generators/QVD_Dashboard_Security.qvw"))){
+        	Write-Host "Running Performance Dashboard QVD Generation publisher..."
+        	& '\\etl\d$\DashboardAdminConsoleEDX\Release\DashboardAdminConsoleEDX.exe'  "Performance Dashboard QVD Generation"
+        	Write-Host $LASTEXITCODE
+        	$i = 1
+        }
+		
+	}

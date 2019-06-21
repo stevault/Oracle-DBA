@@ -1,0 +1,42 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+set pagesize 0 linesize 200 feedback off
+
+spool mlog_count.sql
+prompt set pagesize 0 linesize 200 feedback off
+prompt col t format a43
+prompt col c format 999,999,999,999
+prompt spool mlog_count.log
+
+prompt prompt T                                                          C
+prompt prompt -------------------------------------------- --------------- 
+
+select 'select ''' || table_name || ''' t, count(1) c from ivos_st.' || table_name || ';'
+  from dba_tables
+ where table_name like 'MLOG%'
+   and owner = 'IVOS_ST'
+order by table_name
+/
+
+spool off
+
+@mlog_count
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

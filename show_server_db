@@ -1,0 +1,60 @@
+#######################################################
+#######################################################
+#
+# show_server_db
+#  (sjt)
+#   list servers and the databases running on them
+#	by querying a host's process list via ssh
+#
+#   SYNTAX:  show_server_db [ -flag "<option>" -flag2 "<option>" ]
+#
+#   FLAGS:
+#	-h "<hostlist>"
+#     -app "<application>"
+#     -env "<environment>"
+#  -colsep "<character(s) used to separate the output fields>"
+#
+#  examples
+#	show_server_db -env os -app dev
+#	show_server_db -h "awnjpoda01-pub awnjpoda02-pub"
+#	show_server_db -colsep "|"
+#
+#   CREATED: 8/4/2016
+#
+#######################################################
+#######################################################
+HOSTLIST=$ALLHOSTS
+DBPROC=ora_dbw0_
+APP=""
+ENV=""
+colsep="" 
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -h) HOSTLIST=$1; shift ;;
+ -local) HOSTLIST=`hostname`;;
+   -app) APP=$1; shift ;;
+   -env) ENV=$1; shift ;;
+-colsep) colsep=$1 ; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+for hst in $HOSTLIST
+do
+  ssh $hst "ps -ef | grep "${DBPROC}" | grep "_${APP}" | grep "_${ENV}" | grep -v grep " | while read a b c d e f g db_process trash
+	do
+	  db=`echo $db_process | sed "s;${DBPROC};;"`
+	  echo ${hst} ${colsep} $db
+	done
+done
+

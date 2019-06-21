@@ -1,0 +1,49 @@
+
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+echo "
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+col name format a25
+col password format a20
+col profile format a12
+prompt SHOWING LOCKED USERS
+
+ select 'NEW' st, '$DB' db, name, su.password, profile, ltime, exptime, expiry_date ,astatus, account_status
+   from sys.user$ su, dba_users u
+  where su.name = u.username 
+    and astatus != 0
+    and astatus != 9
+    and exptime > sysdate-10
+UNION ALL
+ select ''st, '$DB' db, name, su.password, profile, ltime, exptime, expiry_date ,astatus, account_status
+   from sys.user$ su, dba_users u
+  where su.name = u.username 
+    and astatus != 0
+    and astatus != 9
+    and exptime > sysdate-10
+  order by st, exptime
+/
+
+
+" | sqlplus -s ${SYSCONN}@${DB}
+
+

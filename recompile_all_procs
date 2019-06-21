@@ -1,0 +1,108 @@
+DB=$ORACLE_SID
+TMPFILE=/tmp/recomp$$.tmp
+TMPFILE2=/tmp/recomp2$$.tmp
+INVALIDS_EXIST=0
+SHOW=n
+RECURSE=Y
+PREVNUMINVALIDS=9999
+
+rm -f $TMPFILE $TMPFILE2
+
+EXCLUDE_OWNER_LIST="'SYS','SYSTEM'"
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+     -s) SHOW=Y ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+
+######################################################
+show_invalids () {
+
+echo "
+
+set feedback off
+
+
+col object_name format a60
+
+select object_type, owner, object_name, status
+from dba_objects
+where object_type in ('FUNCTION','PROCEDURE','PACKAGE','PACKAGE_BODY','TRIGGER')
+AND status != 'VALID'
+and owner not in ($EXCLUDE_OWNER_LIST)
+order by object_type, owner, object_name;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+}
+
+######################################################
+Recompile_Invalids () {
+
+echo "
+
+set serveroutput on verify off feedback off
+
+begin
+
+for recomp in ( select object_type, owner, object_name, status,
+     		'alter ' || object_type || ' ' || owner || '.' || object_name || ' compile ' || case when object_type = 'PACKAGE' then 'body' end sql_stmt
+		from dba_objects
+		where object_type in ('FUNCTION','PROCEDURE','PACKAGE','PACKAGE_BODY','TRIGGER')
+		and owner not in ($EXCLUDE_OWNER_LIST)
+		AND status != 'VALID'
+		order by owner, object_name desc) loop
+
+
+     dbms_output.put_line('prompt --------------------------------------------------------------------------------------');
+     dbms_output.put_line(recomp.object_type || ' ' || recomp.owner || '.' || recomp.object_name);
+     dbms_output.put_line(recomp.sql_stmt || ';');
+     dbms_output.put_line('show error');
+
+end loop;
+end;
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+}
+
+MainLoop() {
+
+#show_invalids  > $TMPFILE
+#wc -l $TMPFILE | read lines filename
+
+while [ $RECURSE = 'Y' ]
+do
+
+ show_invalids  | wc -l | read NUMINVALIDS filename
+
+ if [ $NUMINVALIDS -gt 2 -a $NUMINVALIDS -lt $PREVNUMINVALIDS ]; then 
+   Recompile_Invalids > $TMPFILE2
+   cat $TMPFILE2 | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+ else
+   return 
+ fi
+
+ PREVNUMINVALIDS=$NUMINVALIDS
+
+done
+
+}
+
+MainLoop
+
+

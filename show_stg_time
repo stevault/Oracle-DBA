@@ -1,0 +1,47 @@
+DB=$ORACLE_SID
+VERBOSE=n
+COLS="value latency"
+PAGES=0
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+        -d) DB=$1; shift ;;
+     -date) COLS="sysdate- to_dsinterval(value) snaptime"; PAGES=0 ;;
+        -v) COLS="sysdate, sysdate- to_dsinterval(value) late_date, sysdate - (sysdate- to_dsinterval(value)) latency" ; PAGES=100 ;;
+         *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+
+
+echo -e "
+
+ set pagesize $PAGES feedback off
+
+ col lag_time format 99999.999
+ col recovery_time format 99999.999
+ col latency format 99999.999
+
+ alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+ with lag as (select value from v\$dataguard_stats where name = 'apply lag')
+    , est as (select value from v\$dataguard_stats where name = 'apply finish time')
+  select lag.value lag_time --, est.value recovery_Time
+  from lag, est;
+
+" | sqlplus -s $SYSCONN@$DB as sysdba
+
+exit 0
+
+#to_date('$curdate','Mon DD hh24:mi:ss YYYY') curr_date, to_date('$curdate','Mon DD hh24:mi:ss YYYY') - to_dsinterval('$latency') late_date
+# 	, to_date('$curdate','Mon DD hh24:mi:ss YYYY') - (to_date('$curdate','Mon DD hh24:mi:ss YYYY') - to_dsinterval('$latency')) latency from dual;
+

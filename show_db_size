@@ -1,0 +1,38 @@
+
+DB=$ORACLE_SID
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+echo "
+
+column datafiles_mb format 999,999,999
+column tempfiles_mb format 999,999,999
+column redofiles_mb format 999,999,999
+column dbsize_mb format 999,999,999
+
+select datafiles_mb + tempfiles_mb + redofiles_mb + controlfile_mb dbsize_mb
+	, datafiles_mb , tempfiles_mb , redofiles_mb , controlfile_mb
+from 
+(select sum(bytes)/1024/1024 DATAFILES_mb from dba_data_files) df,
+(select sum(bytes)/1024/1024 TEMPFILES_mb from dba_temp_files) tf,
+(select sum(bytes)/1024/1024 REDOFILES_mb from v\$log) lf,
+(select sum(BLOCK_SIZE*FILE_SIZE_BLKS)/1024/1024/1024 controlfile_mb from v\$controlfile) cf
+;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+

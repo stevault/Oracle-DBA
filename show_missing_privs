@@ -1,0 +1,97 @@
+
+########################################################################################
+gen_missing_privs () {
+
+p_OWNERCLAUSE=$1
+p_GRANTEECLAUSE=$2
+p_GRANTEE=$3
+
+
+echo "
+
+select 'grant SELECT on ' || owner || '.' || object_name || ' to ' || $p_GRANTEE || ';'
+ from (
+ select owner, object_name
+   from dba_objects
+  where $p_OWNERCLAUSE
+    and object_type in ('VIEW','TABLE')
+    and object_name not in (
+		 select table_name
+		   from dba_tab_privs
+		  where $p_OWNERCLAUSE
+		    and $p_GRANTEECLAUSE
+		    and privilege = 'SELECT')
+)
+/
+
+" | sqlplus -s $SYSCONN@$DB
+
+} 
+
+########################################################################################
+show_missing_privs () {
+
+p_OWNERCLAUSE=$1
+p_GRANTEECLAUSE=$2
+
+
+echo "
+
+ select object_name
+   from dba_objects
+  where $p_OWNERCLAUSE
+    and object_type in ('VIEW','TABLE')
+minus
+ select table_name
+   from dba_tab_privs
+  where $p_OWNERCLAUSE
+    and $p_GRANTEECLAUSE
+    and privilege = 'SELECT'
+/
+
+" | sqlplus -s $SYSCONN@$DB
+
+} 
+
+########################################################################################
+########################################################################################
+
+DB=$ORACLE_SID
+GENSQL=N
+OWNERCLAUSE="1=1"
+GRANTEECLAUSE="1=1"
+READONLY=Y
+
+if [ $# -lt 1 ]; then
+   echo "ERROR:  missing parameter"
+   echo "SYNTAX:  $0 [ -d <database> ] [ -owner <owner> | all ] [ -grantee <segment_type> | all ]"
+   exit 2
+fi
+
+while [ $# -ge 1 ]; do
+
+   opt=$1
+ 
+   case $opt in 
+            -d) shift; DB=$1; shift;;
+        -owner) shift; OWNERCLAUSE="owner = upper('$1')"; shift ;;
+      -grantee) shift; GRANTEE="upper('$1')" ; GRANTEECLAUSE="grantee = upper('$1')"; shift ;;
+       -gensql) shift; GENSQL=Y ;;
+           -ro) shift; READONLY=Y;;
+           -rw) shift; READONLY=N;;
+             *) echo "I don't know what $opt is..."; exit 2;;
+   esac
+
+done
+
+
+if [ $GENSQL = Y ]; then
+   gen_missing_privs "$OWNERCLAUSE"  "$GRANTEECLAUSE"  "$GRANTEE" 
+else
+   show_missing_privs "$OWNERCLAUSE"  "$GRANTEECLAUSE" 
+fi
+
+exit 
+
+
+

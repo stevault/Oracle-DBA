@@ -1,0 +1,367 @@
+Thu Apr 28 12:45:59 EDT 2016
+WH_ST.MVI_CLAIM
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:14 EDT 2016
+WH_ST.MVI_INSURER
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:14 EDT 2016
+WH_ST.MVI_LITIGATION
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:19 EDT 2016
+WH_ST.MVD_POLICY_MGMTLIAB_FIDUCIARY
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:20 EDT 2016
+WH_ST.MVD_POLICY_MGMTLIAB_FID_PLANS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:21 EDT 2016
+WH_ST.MVD_POLICY_MGMTLIAB_EXT_JV
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:22 EDT 2016
+WH_ST.MVD_POLICY_MGMTLIAB_FIN_RSTC
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:22 EDT 2016
+WH_ST.MVI_MULTIPLE_POLICY_CLAIM
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:34 EDT 2016
+WH_ST.MVI_NATURE_OF_INJURY
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:34 EDT 2016
+WH_ST.MVI_NATURE_OF_INJURY_GROUP
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:46:35 EDT 2016
+WH_ST.MVI_NOTEPAD
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:53:34 EDT 2016
+WH_ST.MVI_NOTEPAD_TYPE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:53:35 EDT 2016
+WH_ST.MVI_PAYEE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:24 EDT 2016
+WH_ST.MVI_LITIGATION_CALENDAR
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:25 EDT 2016
+WH_ST.MVI_LITIGATION_CALENDAR_TYPE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:25 EDT 2016
+WH_ST.MVI_LITIGATION_CAUSE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:26 EDT 2016
+WH_ST.MVI_LITIGATION_JURISDICTION
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:26 EDT 2016
+WH_ST.MVI_LITIGATION_RESULT
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:26 EDT 2016
+WH_ST.MVI_LITIGATION_STATUS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:27 EDT 2016
+WH_ST.MVI_LITIGATION_TYPE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:27 EDT 2016
+WH_ST.MVI_LITIGATION_VENDOR
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:28 EDT 2016
+WH_ST.MVI_LITIGATION_VENDOR_TYPE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:28 EDT 2016
+WH_ST.MVI_MARITAL_STATUS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:29 EDT 2016
+WH_ST.MVD_POLICY_SPPL_COVERAGES2
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:32 EDT 2016
+WH_ST.MVD_POLICY_PGU_SCHOOLS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 12:54:33 EDT 2016
+WH_ST.MVI_PAYMENT
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:32:18 EDT 2016
+WH_ST.MVI_PAYMENT_METHOD
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:32:18 EDT 2016
+WH_ST.MVI_PAYMENT_TRANSACTION
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:32:19 EDT 2016
+WH_ST.MVI_PL_GRP
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:32:19 EDT 2016
+WH_ST.MVI_PL_GRP_USR
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:32:20 EDT 2016
+WH_ST.MVI_PL_TEAM
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:32:21 EDT 2016
+WH_ST.MVI_POLICY
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:36:17 EDT 2016
+WH_ST.MVI_POLICY_KIND
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:36:17 EDT 2016
+WH_ST.MVI_POLICY_PERIOD
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:52:05 EDT 2016
+WH_ST.MVI_POLICY_STATUS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:52:06 EDT 2016
+WH_ST.MVI_POLICY_TYPE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:52:07 EDT 2016
+WH_ST.MVI_RATING
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:52:07 EDT 2016
+WH_ST.MVI_RESERVE_TRANSACTION
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:52:08 EDT 2016
+WH_ST.MVI_RESERVE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:59:14 EDT 2016
+WH_ST.MVI_SEX
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:59:14 EDT 2016
+WH_ST.MVI_STATE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 13:59:15 EDT 2016
+WH_ST.MVI_STICKY_NOTE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:04:51 EDT 2016
+WH_ST.MVI_TABLE_AUDIT_LOG
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:42 EDT 2016
+WH_ST.MVI_VEHICLE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:43 EDT 2016
+WH_ST.MVI_UNDERWRITER
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:43 EDT 2016
+WH_ST.MVI_VENDOR
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:45 EDT 2016
+WH_ST.MVI_VENDOR_TYPE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:46 EDT 2016
+WH_ST.MVR_DW_ALLOC_CEDED_HISTORY
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:48 EDT 2016
+WH_ST.MVR_DW_ALLOC_CURR_CEP_CHANGES
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:49 EDT 2016
+WH_ST.MVR_DW_ALLOC_MAPPING_TABLE
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:49 EDT 2016
+WH_ST.MVR_DW_INCREASE_LMT_FACTORS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:53 EDT 2016
+WH_ST.MVR_DW_PRODUCT_TREATY_LMTFCTR
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:54 EDT 2016
+WH_ST.MVR_DW_CEDED_CLAIMS_BY_REINSUR
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:57 EDT 2016
+WH_ST.MVR_DW_REINSURANCE_DONT_INC
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:58 EDT 2016
+WH_ST.MVR_DW_REINSURANCE_ELIMIN
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:54:58 EDT 2016
+WH_ST.MVR_DW_REINSURANCE_FAC
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 15:59:06 EDT 2016
+WH_ST.MVR_DW_REINSURANCE_PREMIUM
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:03:54 EDT 2016
+WH_ST.MVR_DW_REINSURERS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:03:54 EDT 2016
+WH_ST.MVR_DW_REINSURERS_BY_TREATY
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:03:55 EDT 2016
+WH_ST.MVR_DW_REINS_BROKERS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:03:55 EDT 2016
+WH_ST.MVR_DW_REINS_CEDED_CLAIMS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:03:56 EDT 2016
+WH_ST.MVR_DW_REINS_EARNINGS_LOSS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:34:16 EDT 2016
+WH_ST.MVR_DW_REINS_CEDED_PREMIUM
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:35:49 EDT 2016
+WH_ST.MVR_DW_REINS_SUM_TOT_ACCTG
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:36:24 EDT 2016
+WH_ST.MVR_DW_REINS_SUM_TOT_PAPER
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:36:58 EDT 2016
+WH_ST.MVR_DW_TREATY_LAYERS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:36:58 EDT 2016
+WH_ST.MVR_DW_TREATY_LAYER_CEDE_RT
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:36:59 EDT 2016
+WH_ST.MVR_DW_TYPE_OF_ORGANIZATION
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:36:59 EDT 2016
+WH_ST.MVR_DW_TREATY_LAYER_RATIOS
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:37:00 EDT 2016
+WH_ST.MVD_POLICY_MGMTLIAB_PRIV_PLC
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:37:01 EDT 2016
+WH_ST.MVD_POLICY_MGMTLIAB_PLAN_CANCL
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:37:01 EDT 2016
+WH_ST.MVD_POLICY_MGMTLIAB_RATE_FCTR
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:37:03 EDT 2016
+WH_ST.MVR_REINS_CEDED_CLAIMS_SUMMARY
+
+PL/SQL procedure successfully completed.
+
+Thu Apr 28 16:37:36 EDT 2016
+WH_ST.MVD_SUBMISSION

@@ -1,0 +1,6 @@
+#!/bin/ksh
+
+for D in `ls`
+do
+  [ -d $D ] && du $D 2>/dev/null | tail -1
+done
