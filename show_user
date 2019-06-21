@@ -24,26 +24,18 @@ done
 echo "
 
 col privilege format a25
-<<<<<<< HEAD
-col grantor format a25
-col table_name format a45
-=======
 col grantee format a25
 set feedback off
 alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 set feedback 10
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 prompt USER
  select USERNAME, USER_ID, created, ACCOUNT_STATUS, LOCK_DATE, EXPIRY_DATE
    from dba_users where upper(username) = upper('$USR');
 
-<<<<<<< HEAD
  select password
    from sys.user\$ where name = upper('$USR');
 
-=======
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
  select username, DEFAULT_TABLESPACE, TEMPORARY_TABLESPACE, PROFILE
  from dba_users where upper(username) = upper('$USR');
 
@@ -58,12 +50,9 @@ select * from dba_role_privs where upper(grantee) = upper('$USR');
 prompt SYS_PRIVS
 select * from dba_sys_privs where upper(grantee) = upper('$USR');
 
-<<<<<<< HEAD
-=======
 prompt SYS_PRIVS
 select * from dba_ts_quotas where upper(username) = upper('$USR');
 
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 prompt OBJECTS
 select object_type, count(1)
   from dba_objects

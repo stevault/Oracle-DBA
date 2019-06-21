@@ -5,13 +5,9 @@ REFRESH=N
 ORIGINAL_COMMAND_LINE="$0 $*"
 REFSEC=3
 
-<<<<<<< HEAD
-##################################################################################
-=======
 . /home/oracle/awdba/.sh_common
 #OPTSB#####################################################
 
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 while [ $# -ge 1 ]; do
 
   opt=$1
@@ -23,20 +19,14 @@ while [ $# -ge 1 ]; do
       -s) THRESHSEC=$1; shift ;;
      -eq) OPERATOR=$1; shift ;;
 -refresh) REFRESH=Y; REFSEC=$1; shift ;;
-<<<<<<< HEAD
-=======
-  -opts) sh_show_opts ; exit 0 ;;
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
+   -opts) sh_show_opts ; exit 0 ;;
        *) echo "I don't know what $opt is...\n" ; exit 2;;
   esac
 
 done
 
-<<<<<<< HEAD
-=======
 #OPTSE#####################################################
 
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 if [ "$REFRESH" = "Y" ]; then
 
  while :
@@ -82,20 +72,12 @@ serial#,
  PROGRAM, 
  STATUS,
 	sql_id, logon_time, sql_exec_start, (sysdate-sql_exec_start)*24*60*60 elap_sec
-<<<<<<< HEAD
-   from gv\$session
-  where sql_exec_start is not null
-    and status != 'INACTIVE'
-    and (sysdate - sql_exec_start) > $THRESHSEC/(24*60*60)
-  order by sql_exec_start desc
-=======
    from gv\$session s
   where 1=1
     and s.sql_exec_start is not null
     and s.status != 'INACTIVE'
     and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
   order by s.sql_exec_start desc
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 /
 
 set long 99999 lines 200
@@ -108,14 +90,9 @@ prompt Reporting Long Running SQL (threshold = $THRESHSEC seconds)
    from gv\$sql q, gv\$session s
   where s.sql_id = q.sql_id
     and s.inst_id = q.inst_id
-<<<<<<< HEAD
-    and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
-    and s.status != 'INACTIVE'
-=======
     and sql_exec_start is not null
     and s.status != 'INACTIVE'
     and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
   group by q.sql_id, q.sql_text
 /
 
@@ -127,28 +104,18 @@ col INSTANCE_2 format a120
    from gv\$session s
   where '$KILL' = 'Y'
     and inst_id = 1
-<<<<<<< HEAD
-    and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
-    and s.status != 'INACTIVE'
-=======
     and sql_exec_start is not null
     and s.status != 'INACTIVE'
     and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 /
 
  select 'alter system kill session ''' || sid || ',' || serial# || ''';' INSTANCE_2
    from gv\$session s
   where '$KILL' = 'Y'
     and inst_id = 2
-<<<<<<< HEAD
-    and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
-    and s.status != 'INACTIVE'
-=======
     and sql_exec_start is not null
     and s.status != 'INACTIVE'
     and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 /
 
 

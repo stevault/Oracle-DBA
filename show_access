@@ -57,11 +57,8 @@ echo "
 
 rem col owner format a15
 rem col db_link format a15
-<<<<<<< HEAD
 col table_name format a60
 col grantor format a20
-=======
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
  select *
    from dba_tab_privs

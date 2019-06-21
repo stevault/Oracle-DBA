@@ -38,10 +38,7 @@ while [ $# -ge 1 ];do
 
   case $opt in
      -h) HOSTLIST=$1; shift ;;
-<<<<<<< HEAD
-=======
  -local) HOSTLIST=`hostname`;;
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
    -app) APP=$1; shift ;;
    -env) ENV=$1; shift ;;
 -colsep) colsep=$1 ; shift ;;

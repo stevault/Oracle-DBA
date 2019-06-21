@@ -16,11 +16,6 @@ done
 
 #OPTSE#####################################################
 echo "
-<<<<<<< HEAD
-select db_name, gather_month
-	, gb
-	, sixmoago
-=======
 
 set pagesize 200
 
@@ -30,7 +25,6 @@ select db_name, gather_month
 	, gb
 	, sixmoago
 	, round(gb-sixmoago,2) gb_change
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 	, round(100* (gb-sixmoago)/sixmoago,2) pct_change
 from (
 select 

@@ -14,11 +14,7 @@ done
 
 echo "
 
-<<<<<<< HEAD
 set feedback off lines 300
-=======
-set feedback off
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 col memtyp format a20
 col p_value format 9,999,999,999,999

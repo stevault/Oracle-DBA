@@ -9,10 +9,7 @@ while [ $# -ge 1 ];do
 
   case $opt in
      -d) DB=$1; shift ;;
-<<<<<<< HEAD
   -conn) SYSCONN=$1; shift ;;
-=======
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
       *) echo "I don't know what $opt is...\n" ; exit 2;;
   esac
 

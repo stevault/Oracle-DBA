@@ -27,13 +27,8 @@ while [ $# -ge 1 ];do
   case $opt in
      -d) DB=$1; shift ;;
    -err) SHOWERROR=Y;;
-<<<<<<< HEAD
- -owner) OWNERCLAUSE="owner = '$1'"; shift ;;
-  -type) TYPECLAUSE="type= '$1'"; shift ;;
-=======
  -owner) OWNERCLAUSE="owner = upper('$1')"; shift ;;
   -type) TYPECLAUSE="type= upper('$1')"; shift ;;
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
   -opts) sh_show_opts ; exit 0 ;;
       *) echo "I don't know what $opt is...\n" ; exit 2;;
   esac
@@ -71,10 +66,7 @@ set lines 250 pages 9999 feedback off
   where name = upper('$OBJECT')
     and $OWNERCLAUSE
     and $TYPECLAUSE
-<<<<<<< HEAD
-=======
     and type != 'PACKAGE'
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
   order by line;
 
 " | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB

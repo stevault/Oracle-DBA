@@ -27,11 +27,8 @@ done
 
 echo "
 
-<<<<<<< HEAD
-=======
 set feedback off
 alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 col owner format a10
 col object_name format a40
 col subobject_name format a10
@@ -52,29 +49,6 @@ col edition_name format a10
   where object_name $OPERATOR upper('$OBJECT')
 order by object_name, owner, object_type ;
 
-<<<<<<< HEAD
 " |  $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
-=======
-" |  $ORACLE_HOME/bin/sqlplus -s awdba/awdba@$DB
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
-
-
-exit
-
- OWNER                                                                                                                   VARCHAR2(30)
- OBJECT_NAME                                                                                                             VARCHAR2(128)
- SUBOBJECT_NAME                                                                                                          VARCHAR2(30)
- OBJECT_ID                                                                                                               NUMBER
- DATA_OBJECT_ID                                                                                                          NUMBER
- OBJECT_TYPE                                                                                                             VARCHAR2(19)
- CREATED                                                                                                                 DATE
- LAST_DDL_TIME                                                                                                           DATE
- TIMESTAMP                                                                                                               VARCHAR2(19)
- STATUS                                                                                                                  VARCHAR2(7)
- TEMPORARY                                                                                                               VARCHAR2(1)
- GENERATED                                                                                                               VARCHAR2(1)
- SECONDARY                                                                                                               VARCHAR2(1)
- NAMESPACE                                                                                                               NUMBER
- EDITION_NAME                                                                                                            VARCHAR2(30)
 
 

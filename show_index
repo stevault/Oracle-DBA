@@ -1,5 +1,4 @@
 
-<<<<<<< HEAD
 DB=$ORACLE_SID
 
 if [ $# -lt 1 ]; then
@@ -26,16 +25,6 @@ done
 
 ############################################################
 echo "
-=======
-if [ $# -lt 1 ]; then
-   echo "Missing parameter - index_name."
-   exit 1
-fi
-
-OBJECT=$1
-
-$ORACLE_HOME/bin/sqlplus -s '/ as sysdba' << EOF
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 set feedback off
 alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 col owner format a13
@@ -46,10 +35,7 @@ col column_name format a40
 compute sum of mb on report
 break on report
 
-<<<<<<< HEAD
 ttitle center 'TABLE INFO'  skip 2
-=======
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
  select 
  t.OWNER,
  t.table_NAME,
@@ -58,10 +44,7 @@ ttitle center 'TABLE INFO'  skip 2
  o.created,
  t.TABLESPACE_NAME,
  t.STATUS,
-<<<<<<< HEAD
  t.logging,
-=======
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
  t.last_analyzed,
  LEAF_BLOCKS, DISTINCT_KEYS, NUM_ROWS 
    from dba_indexes t, dba_objects o
@@ -70,10 +53,7 @@ ttitle center 'TABLE INFO'  skip 2
     and t.index_name = o.object_name
     and o.object_type = 'INDEX' ;
 
-<<<<<<< HEAD
 ttitle center 'TABLE INFO'  skip 2
-=======
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
  select 
  owner,
  SEGMENT_NAME,
@@ -83,7 +63,6 @@ ttitle center 'TABLE INFO'  skip 2
    from dba_segments
   where segment_name = upper('$OBJECT');
 
-<<<<<<< HEAD
 ttitle center 'INDEXED COLUMNS'  skip 2
  select index_name, column_position, column_name
    from dba_ind_columns c
@@ -94,30 +73,7 @@ ttitle center 'INDEXED COLUMNS'  skip 2
 " | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
 
 
-
-
-
-
-
-
-
-
-
-
 if [ $# -lt 1 ]; then
    exit 1
 fi
 
-OBJECT=$1
-
-$ORACLE_HOME/bin/sqlplus -s '/ as sysdba' << EOF
-=======
- select index_name, column_position, column_name
-   from dba_ind_columns
-  where index_name = upper('$OBJECT');
-
-EOF
-
-
-
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1

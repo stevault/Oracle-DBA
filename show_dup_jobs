@@ -18,14 +18,10 @@ done
 #OPTSE#####################################################
 echo "
 col what format a80
-<<<<<<< HEAD
-alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
-=======
 set feedback off
 alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 set feedback 20
 
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 select 
 what, job, broken, last_date, this_date, next_date, failures, total_time
  from dba_jobs where what in ( select what from dba_jobs group by what having count(1) > 1)

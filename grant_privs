@@ -1,4 +1,3 @@
-
 SCHEMA=tmp
 PRIVILEGE=none
 GRANTEE=me
@@ -38,11 +37,6 @@ echo "
 select 'GRANT $PRIVILEGE ON $SCHEMA.' || object_name || ' TO $GRANTEE;'
   from dba_objects
  where owner = upper('$SCHEMA')
-<<<<<<< HEAD
-   and object_type in ('TABLE','VIEW','SEQUENCE')
-   and (object_name = '$OBJECT_NAME' or '$OBJECT_NAME' = 'all')
-   and ('$PRIVILEGE' = 'SELECT' or '$PRIVILEGE' = 'SELECT,UPDATE,INSERT,DELETE');
-=======
    and object_type in ('TABLE','VIEW')
    and (object_name = '$OBJECT_NAME' or '$OBJECT_NAME' = 'all')
    and ('$PRIVILEGE' = 'SELECT' or '$PRIVILEGE' = 'SELECT,UPDATE,INSERT,DELETE')
@@ -54,13 +48,12 @@ select 'GRANT SELECT ON $SCHEMA.' || object_name || ' TO $GRANTEE;'
    and (object_name = '$OBJECT_NAME' or '$OBJECT_NAME' = 'all')
    and ('$PRIVILEGE' = 'SELECT' or '$PRIVILEGE' = 'SELECT,UPDATE,INSERT,DELETE')
 ;
->>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 " | sqlplus -s $SYSCONN@$DB > $TMPSCRIPT
 
 ls -l $TMPSCRIPT 
 cat $TMPSCRIPT | sqlplus -s $SYSCONN@$DB
 
+# cleanup
 find /var/tmp -name ${BASE} -mtime +14 -exec ls -l {} \;
-#find /var/tmp -name ${BASE} -mtime +14 -exec rm  {} \;
 
