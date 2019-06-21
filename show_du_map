@@ -1,0 +1,59 @@
+#!/bin/ksh
+
+
+BASE=`basename $0`
+STARTDIR=`pwd`
+WORKFILE=/tmp/${BASE}.tmp
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+   -dir) STARTDIR=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+rm -f $WORKFILE 
+WORKDIR=$STARTDIR
+
+while :
+do
+     echo "Press Enter to continue with $WORKDIR, or specify a different directory."
+     read yorn
+
+     if [ -z "$yorn" ]; then
+        :
+     else
+        WORKDIR=$yorn
+     fi 
+
+     du $WORKDIR -m --max-depth=1 --one-file-system 1>$WORKFILE 2>/dev/null
+     wc -l $WORKFILE | read l other
+     if [ $l = 1 ]; then
+	ls -l $WORKDIR
+        exit 0
+     fi
+        
+#     grep -v "${WORKDIR}$" $WORKFILE | grep -v "\.$" | sort -n | tail -1 | read Size NextDir
+
+     tail -1  $WORKFILE | read TotSize TotDir
+
+     grep -v "${WORKDIR}$" $WORKFILE | sort -n | while read SubSize SubDir
+     do
+        let NUMX=100*$SubSize/$TotSize
+        NUMC=`printf '.%.0s' {1..$NUMX}`
+
+        echo "$SubSize $SubDir $NUMC" | awk '{ printf("%9s %-80s %-100s\n",$1,$2,$3) }'
+        WORKDIR=$SubDir
+
+     done
+
+done
+exit 0

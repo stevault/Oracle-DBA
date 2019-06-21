@@ -1,0 +1,71 @@
+DB=$ORACLE_SID
+PRIV_CLAUSE=1=1
+USR_CLAUSE=1=1
+OBJ_CLAUSE=1=1
+OWN_CLAUSE=1=1
+GENSQL=N 
+
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+  -priv) PRIV_CLAUSE="privilege = upper('$1')"; shift ;;
+   -usr) USR_CLAUSE="grantee= upper('$1')"; shift ;;
+   -obj) OBJ_CLAUSE="table_name= upper('$1')"; shift ;;
+   -own) OWN_CLAUSE="owner= upper('$1')"; shift ;;
+-gensql) GENSQL=Y ;;
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+if [ $GENSQL = 'Y' ]; then
+
+p_OWNERCLAUSE=$1
+p_GRANTEECLAUSE=$2
+p_GRANTEE=$3
+
+
+echo "
+
+select 'grant ' || privilege || ' on ' || owner || '.' || table_name || ' to ' || GRANTEE || ';'
+ from (
+ select *
+   from dba_tab_privs
+  where $PRIV_CLAUSE
+    and $USR_CLAUSE
+    and $OBJ_CLAUSE
+    and $OWN_CLAUSE
+  )
+/
+
+" | sqlplus -s $SYSCONN@$DB
+
+
+else
+
+echo "
+
+rem col owner format a15
+rem col db_link format a15
+
+ select *
+   from dba_tab_privs
+  where $PRIV_CLAUSE
+    and $USR_CLAUSE
+    and $OBJ_CLAUSE
+    and $OWN_CLAUSE;
+
+
+" | sqlplus -s $SYSCONN@$DB
+
+fi

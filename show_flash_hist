@@ -1,0 +1,65 @@
+#!/bin/ksh
+
+DB=$ORACLE_SID
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+check_fb () {
+
+echo -e "
+
+set feedback off pagesize 0 linesize 20 trimspool on 
+select flashback_on from v\$database;
+" | $ORACLE_HOME/bin/sqlplus -s ${SYSCONN}@$DB 
+
+} 
+
+check_fb
+check_fb | read ISON
+
+if [ $ISON = "YES" ]; then
+
+echo -e "
+
+set feedback off
+
+col oldest_flashback_scn format 99999999999999999
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+ select '$DB' instance, oldest_flashback_scn, oldest_flashback_time
+--	, systimestamp - oldest_flashback_time
+	, extract( day from systimestamp - oldest_flashback_time) days
+        , extract( hour from systimestamp - oldest_flashback_time) hours
+	, extract( minute from systimestamp - oldest_flashback_time) minutes
+	, extract( second from systimestamp - oldest_flashback_time) seconds
+   from v\$flashback_database_log;
+
+" | $ORACLE_HOME/bin/sqlplus -s ${SYSCONN}@$DB 
+
+retcode=$?
+
+else
+
+   retcode=1
+   echo "$DB does not have flashback turned on."
+
+fi   
+
+exit $retcode
+
+

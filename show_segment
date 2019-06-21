@@ -1,0 +1,56 @@
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameter - object_name."
+   exit 1
+fi
+
+OBJECT=$1
+shift
+
+CLAUSE=""
+
+
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+     -o) shift; CLAUSE="$CLAUSE and owner = UPPER('$1')" ; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+echo "
+
+col mb format 999999.99
+col segment_name format a40
+col Object_name format a40
+
+set feedback off
+
+ select object_type, owner, object_name, created
+   from dba_objects
+  where object_name = upper('$OBJECT')
+    --
+   ${CLAUSE};
+
+ select segment_type, owner, segment_name, bytes/1024/1024 MB
+	, tablespace_name
+   from dba_segments
+  where segment_name = upper('$OBJECT')
+    --
+   ${CLAUSE};
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+

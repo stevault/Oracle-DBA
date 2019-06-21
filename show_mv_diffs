@@ -1,0 +1,168 @@
+DB=$ORACLE_SID
+######################################################
+#
+# show_mv_diffs
+#
+######################################################
+
+# SYNTAX:  $0 [ -source SOURCE_TABLE ] [ -snapshot MATERIALIZED_VIEW ] [ -fix | -showfix ]"
+
+TMPDIR=/var/tmp
+BASE=`basename $0`
+SOURCETABLE_CLAUSE="1=1"
+MATVIEW_CLAUSE="1=1"
+SHOWFIX=N
+FIX=N
+TMPFILE=$TMPDIR/${BASE}_$$.tmp
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+          -d) DB=$1; shift ;;
+     -source) SOURCETABLE_CLAUSE="source_table = '$1'"; shift ;;
+   -snapshot) MATVIEW_CLAUSE="snapshot = '$1'"; shift ;;
+        -fix) FIX=Y;;
+    -showfix) SHOWFIX=Y;;
+           *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#############################################################################
+#############################################################################
+show_report () {
+
+echo "
+
+set lines 150 feedback off
+
+col snapshot format a40
+col source_table format a40
+col mv_type format a20
+col src_type format a20
+
+ttitle \"columns where COLUMN ID is different\"
+ select SNAPSHOT, SOURCE_TABLE, COLUMN_NAME                    
+	, id_diff, src_id, mv_id
+   from wh_St.awdba_mv_compare
+  where ID_DIFF = 'Y'
+    and $SOURCETABLE_CLAUSE
+    and $MATVIEW_CLAUSE
+/
+
+
+ttitle \"columns where DATA TYPE is different\"
+ select  SNAPSHOT, SOURCE_TABLE, COLUMN_NAME
+	, type_Diff src_type, mv_type
+   from wh_St.awdba_mv_compare
+  where TYPE_DIFF = 'Y'
+    and $SOURCETABLE_CLAUSE
+    and $MATVIEW_CLAUSE
+/
+
+
+ttitle \"columns where LENGTH OF FIELD is different\"
+ select  SNAPSHOT, SOURCE_TABLE, COLUMN_NAME
+	, len_diff, src_len, mv_len
+   from wh_St.awdba_mv_compare
+  where LEN_DIFF = 'Y'
+    and $SOURCETABLE_CLAUSE
+    and $MATVIEW_CLAUSE
+/
+
+
+ttitle \"columns where PRECISION OF FIELD is different\"
+ select  SNAPSHOT, SOURCE_TABLE, COLUMN_NAME
+	, prec_diff, src_prec, mv_prec
+   from wh_St.awdba_mv_compare
+  where PREC_DIFF = 'Y'
+    and $SOURCETABLE_CLAUSE
+    and $MATVIEW_CLAUSE
+/
+
+
+ttitle \"columns where SCALE OF FIELD is different\"
+ select  SNAPSHOT, SOURCE_TABLE, COLUMN_NAME
+	, scale_diff, src_scale, mv_scale
+   from wh_St.awdba_mv_compare
+  where SCALE_DIFF = 'Y'
+    and $SOURCETABLE_CLAUSE
+    and $MATVIEW_CLAUSE
+/
+
+
+ttitle \"columns where NULL designation is different\"
+ select  SNAPSHOT, SOURCE_TABLE, COLUMN_NAME
+	, null_diff, src_null, mv_null
+   from wh_St.awdba_mv_compare
+  where NULL_DIFF = 'Y'
+    and $SOURCETABLE_CLAUSE
+    and $MATVIEW_CLAUSE
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+
+}
+
+#############################################################################
+show_fixes () {
+
+echo "
+
+whenever sqlerror exit sql.sqlcode
+set pagesize 0 linesize 150 trimspool on verify off feedback off
+
+ select  'alter materialized view ' || snapshot || ' modify (' || column_name || ' ' || mv_type || '(' || src_prec || ',' || decode(scale_diff,'Y',src_scale,mv_scale) || ')' || ');'
+   from wh_St.awdba_mv_compare
+  where PREC_DIFF = 'Y'
+    and $SOURCETABLE_CLAUSE
+    and $MATVIEW_CLAUSE
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+
+}
+#############################################################################
+
+#############################################################################
+if [ $SHOWFIX = 'Y' ]; then
+   show_report
+   retcode=$?
+
+   show_fixes
+   retcode=$?
+
+elif [ $FIX = 'Y' ]; then
+   rm -f $TMPFILE
+   show_fixes > $TMPFILE
+   retcode=$?
+
+   echo
+   cat $TMPFILE
+
+   if [ $retcode != 0 ]; then 
+      echo "An error occurred creating the fix script."
+      exit 1
+   fi
+
+   echo -e "\nDo you want to implement these changes (Y or N)?  \c"
+   read yorn
+
+   if [ $yorn = 'y' -o $yorn = 'Y' ]; then
+      cat $TMPFILE | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+      retcode=$?
+   fi
+
+else
+   show_report
+   retcode=$?
+
+fi
+
+exit $retcode
+

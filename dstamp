@@ -1,0 +1,22 @@
+#!/bin/ksh
+
+[ $# -lt 1 ] && echo -e "\nSYNTAX: $0 <filename>\n" && exit 2
+
+TSTAMP=`date '+%Y%m%d'`
+FILE=${1}
+NEWFILE=${FILE}.${TSTAMP}
+
+[ -f $NEWFILE ] && echo -e "File '$NEWFILE' already exists..." && exit 0
+[ ! -f $FILE ] && echo -e "File '$FILE' does not exist..." && exit 1
+
+echo "Backing up file '$FILE' to '$NEWFILE'"
+
+cp -p $FILE $NEWFILE
+if [ $? -ne 0 ]; then
+   echo "ERROR:  An error occurred during the archival of $FILE..."
+   exit 1
+fi
+
+ls -l $FILE $NEWFILE
+
+exit 0

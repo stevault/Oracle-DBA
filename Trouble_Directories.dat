@@ -1,0 +1,21 @@
+/u01/app/grid/diag/tnslsnr/`hostname`/listener*/trace
+/u01/app/grid/diag/tnslsnr/`hostname`/listener*/alert
+
+/u01/app/11.2.0.4/grid/log/diag/tnslsnr/`hostname`/listener*/alert
+/u01/app/11.2.0.4/grid/log/diag/tnslsnr/`hostname`/listener_scan*/trace/listener_scan*.log 
+
+/u01/app/grid/diag/crs/awchtoda02-pub/crs/trace/crsctl*.trc
+
+OAK LOGS
+=====
+/opt/oracle/oak/log/awchtoda01-pub/dcli/dcliagent.log
+
+
+
+/u01/app/grid/crsdata/@global/cvu/baseline/cvures
+
+/u01/app/oracle/product/agent12c/agent_inst
+/u01/app/oracle/product/agent12c/agent_inst/awr_t
+
+/home/oracle/oradiag_oracle/diag/clients/user_oracle/host*/alert
+/home/oracle/oradiag_oracle/diag/clients/user_oracle/host*/trace

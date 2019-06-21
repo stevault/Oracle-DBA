@@ -1,0 +1,46 @@
+DB=$ORACLE_SID
+DAYSAGO=0
+. /cloudsfs1/jenkins/OracleEnv.h
+. oraset $DB 1>/dev/null 
+
+USERCLAUSE="= username"
+OSUSERCLAUSE="= os_username"
+
+##################################################################################
+while [ $# -ge 1 ]; do
+
+  opt=$1
+  shift
+
+  case $opt in
+      -d) DB=$1; shift ;;
+   -user) USERCLAUSE="$1" ; shift ;;
+ -osuser) OSUSERCLAUSE="$1" ; shift ;;
+-daysago) DAYSAGO=$1 ; shift ;;
+       *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+##################################################################################
+echo "
+
+Column username format a30
+Column os_username format a30
+Column terminal format a30
+Column tstamp format a10
+Column returncode format 99999999
+Set linesize 140 
+
+  select username, os_username, terminal, to_char(timestamp, 'HH24:MI:SS') tstamp, returncode
+    from dba_audit_trail
+  where timestamp > trunc(sysdate) - $DAYSAGO
+    and action_name = 'LOGON'
+    and returncode != 0
+    and username $USERCLAUSE
+    and os_username $OSUSERCLAUSE
+ order by timestamp ;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+

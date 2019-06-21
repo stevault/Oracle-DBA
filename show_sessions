@@ -1,0 +1,55 @@
+
+DB=$ORACLE_SID
+
+##################################################################################
+while [ $# -ge 1 ]; do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+    -eq) OPERATOR=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+
+##################################################################################
+
+echo "
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+set feedback 10
+
+col inst_id heading I format 9
+col sql_id format a16
+col sql_exec_start format a20
+col elap_sec format 999,999,999
+col machine format a30
+col program format a35
+col osuser format a15
+col username format a18
+col schemaname format a18
+col process format a8
+
+prompt ALL RUNNING SQL
+
+select  inst_id, USERNAME,
+ SID,
+ SERIAL#,
+ SCHEMANAME,
+ OSUSER,
+ MACHINE,
+ PROGRAM, 
+ STATUS,
+  logon_time
+   from gv\$session
+  order by logon_time
+/
+
+--COMMAND, --SERVER,
+
+" | sqlplus -s $SYSCONN@$DB
+

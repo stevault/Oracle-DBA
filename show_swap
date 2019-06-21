@@ -1,0 +1,73 @@
+#######################################################
+#######################################################
+#
+# show_swap
+#  (sjt)
+#   list server swapspace available
+#
+#   SYNTAX:  show_swap [ -all | -h <host> ]
+#
+#   FLAGS:
+#	-h "<hostlist>"
+#     -all all hosts as defined by $ALLHOSTS
+#
+#  examples
+#	show_swap -h awnjpoda01-pub
+#	show_swap -all
+#
+#   updated: 9/15/2016 (allow use for all hosts)
+#
+#######################################################
+#######################################################
+
+HOSTLIST=`hostname`
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -h) HOSTLIST="$1"; shift ;;
+   -all) HOSTLIST=$ALLHOSTS ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+MEMINFOFILE=/proc/meminfo
+
+#SwapTotal:      19529196 kB
+#SwapFree:        5856628 kB 
+
+for HOST in $HOSTLIST
+do
+
+  ssh $HOST grep '^SwapTotal:' $MEMINFOFILE | read labl SwapTotal uom
+  ssh $HOST grep '^SwapFree:' $MEMINFOFILE | read labl SwapFree uom
+
+  let PCTFREE=100*$SwapFree/$SwapTotal
+
+  if [ "$VERBAL" = 'y' -o "$VERBAL" = 'Y' ]; then
+
+     echo "Host $HOST has $PCTFREE percent free swap space."
+
+     echo "Free:  $SwapFree"
+     echo "total: $SwapTotal"
+
+  else
+     echo $HOST $PCTFREE
+  fi
+
+  if [ $PCTFREE -lt 50 ]; then
+     RETCODE=1
+  fi
+
+done
+
+exit $RETCODE
+
+

@@ -1,0 +1,28 @@
+DB=$ORACLE_SID
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+echo "
+
+col comments format a20
+col action_time format a40
+col action format a10
+col namespace format a10
+col bundle_series format a10
+
+ select * from dba_registry_history;
+
+" | sqlplus -s $SYSCONN@$DB

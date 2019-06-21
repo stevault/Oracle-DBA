@@ -1,0 +1,119 @@
+DB=$ORACLE_SID
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameter - table_name."
+   exit 1
+fi
+
+OBJECT=$1
+shift
+
+############################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+############################################################
+echo "
+
+set feedback off
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+set feedback 20 linesize 180
+
+col owner format a13
+col table_name format a40
+col column_name format a40
+col grantor format a13
+col privilege format a20
+col degree format a7
+col segment_name format a40
+col tablespace_name format a20
+
+
+ttitle center "TABLE INFO"  skip 2
+
+ select 
+ t.OWNER,
+ t.TABLE_NAME,
+ o.created,
+ t.TABLESPACE_NAME,
+ t.last_analyzed,
+ t.STATUS,
+ t.NUM_ROWS
+, degree
+   from dba_tables t, dba_objects o
+  where table_name = upper('$OBJECT')
+    and t.owner = o.owner
+    and t.table_name = o.object_name
+    and o.object_type = 'TABLE' ;
+
+ttitle center "PARTITION SUMMARY"  skip 2
+
+ select 
+	TABLE_NAME,
+	count(1) numparts
+   from dba_tab_partitions
+  where table_name = upper('$OBJECT')
+group by table_name;
+
+ttitle center "SEGMENT INFO"  skip 2
+
+ select 
+ SEGMENT_NAME,
+ TABLESPACE_NAME,
+ bytes/1024/1024 MB
+   from dba_segments
+  where segment_name = upper('$OBJECT');
+
+ttitle center "INDEXES"  skip 2
+
+ select 
+ OWNER,
+ index_NAME,
+ UNIQUENESS,
+ TABLESPACE_NAME,
+ LEAF_BLOCKS,
+ DISTINCT_KEYS,
+-- AVG_LEAF_BLOCKS_PER_KEY, AVG_DATA_BLOCKS_PER_KEY,
+ last_analyzed,
+ STATUS,
+ NUM_ROWS 
+   from dba_indexes
+  where table_name = upper('$OBJECT')
+order by owner, index_name;
+
+ttitle center "INDEXED COLUMNS"  skip 2
+
+ select c.index_name, c.column_position, c.column_name
+  from dba_ind_columns c, dba_indexes i
+ where i.table_name = upper('$OBJECT')
+   and c.index_name = i.index_name
+   and c.index_owner = i.owner
+ order by c.index_owner ,c.index_name, c.column_position, c.column_name;
+
+ttitle center "GRANTED PRIVILEGES"  skip 2
+select *
+-- 	grantee, table_name, grantor, privilege
+  from dba_tab_privs
+ where table_name = upper('$OBJECT')
+ order by grantee, privilege;
+
+ttitle center "MATERIALIZED VIEW LOGS"  skip 2
+select *
+  from dba_mview_logs
+ where master = upper('$OBJECT');
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+

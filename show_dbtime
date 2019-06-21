@@ -1,0 +1,70 @@
+DB=$ORACLE_SID
+DBTIME_STATID=3649082374
+TIMEFRAME_CLAUSE="to_char(bs.begin_interval_time,'HH24:MI:SS') < to_char(sysdate,'HH24:MI:SS')"
+WEEKDAY_CLAUSE="1=1"
+
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+     -h) TIMEFRAME_CLAUSE="to_char(bs.begin_interval_time,'HH24') = '$1'"; shift ;;
+  -wkdy) WEEKDAY_CLAUSE="trim(to_char(bs.begin_interval_time,'DAY')) = '$1'"; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+echo "
+
+set pagesize 9000
+col thisweek format 9999999
+col lastweek format 9999999
+col twowksago format 9999999
+
+select instance_number, snap_time, snap_day
+	, sum(case when context = 'CURRENT' then DBTIME else 0 end) THISWEEK
+	, sum(case when context = 'LASTWEEK' then DBTIME else 0 end) LASTWEEK
+	, sum(case when context = 'TWOWKSAGO' then DBTIME else 0 end) TWOWKSAGO
+from (
+select bs.instance_Number 
+	, case
+		when trunc(bs.begin_interval_time) >= trunc(sysdate)-6 and trunc(bs.begin_interval_time) <= trunc(sysdate) then 'CURRENT'
+		when trunc(bs.begin_interval_time) >= trunc(sysdate)-13 and trunc(bs.begin_interval_time) <= trunc(sysdate)-7 then 'LASTWEEK'
+		when trunc(bs.begin_interval_time) >= trunc(sysdate)-20 and trunc(bs.begin_interval_time) <= trunc(sysdate)-14 then 'TWOWKSAGO'
+	  end context
+	, to_char(bs.begin_interval_time,'DAY') snap_day
+	, to_char(bs.begin_interval_time,'HH24:MI') snap_time
+	, (e.value - b.value)/100 dbtime
+  from dba_hist_snapshot bs, dba_hist_sysstat b
+ 	, dba_hist_snapshot es, dba_hist_sysstat e
+ where 1=1
+--
+   and bs.instance_number = es.instance_number
+   and bs.dbid = es.dbid
+   and bs.snap_id = es.snap_id - 1
+--
+   and b.dbid = e.dbid 
+   and b.instance_number = e.instance_number
+   and b.snap_id = e.snap_id - 1
+   and b.stat_id = e.stat_id 
+--
+   and (b.snap_id = bs.snap_id and b.dbid = bs.dbid and b.instance_number = bs.instance_number)
+   and (e.snap_id = es.snap_id and e.dbid = es.dbid and e.instance_number = es.instance_number)
+--
+   and b.stat_id = $DBTIME_STATID
+   and trunc(bs.begin_interval_time) >= trunc(sysdate) - 20
+   and $TIMEFRAME_CLAUSE
+   and $WEEKDAY_CLAUSE
+   --and to_char(bs.begin_interval_time,'HH24:MI:SS') < to_char(sysdate,'HH24:MI:SS')
+)
+group by instance_number, snap_time, snap_day
+order by snap_time, instance_number
+/
+" | sqlplus -s $SYSCONN@$DB

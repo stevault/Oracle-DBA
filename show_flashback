@@ -1,0 +1,35 @@
+
+
+$ORACLE_HOME/bin/sqlplus -s '/ as sysdba' << EOF
+--
+-- List Flashback Database Restore Points
+--
+ 
+REM SET PAUSE ON
+REM SET PAUSE 'Press Return to Continue'
+SET FEEDBACK OFF
+SET PAGESIZE 60
+SET LINESIZE 300
+SET VERIFY OFF
+ 
+COLUMN scn FOR 999,999,999,999,999
+COLUMN Incar FOR 99
+COLUMN name FOR A40
+column time format a35
+COLUMN storage_size FOR 999,999,999,999
+COLUMN guarantee_flashback_database FOR A3
+ 
+SELECT 
+	'$ORACLE_SID' instance,
+      database_incarnation# as Incar,
+      scn,
+      name,
+      time,
+      storage_size,
+      guarantee_flashback_database
+FROM 
+      v\$restore_point
+/
+
+EOF
+

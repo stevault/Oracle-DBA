@@ -1,0 +1,62 @@
+
+DB=$ORACLE_SID
+
+if [ $# -lt 1 ]; then
+   echo "ERROR: missing parameter."
+   echo "SYNTAX: $0 <username>"
+   exit 2
+fi
+
+USR=$1 
+shift
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+echo "
+
+col privilege format a25
+
+prompt USER
+ select USERNAME, USER_ID, created, ACCOUNT_STATUS, LOCK_DATE, EXPIRY_DATE
+   from dba_users where upper(username) = upper('$USR');
+
+ select username, DEFAULT_TABLESPACE, TEMPORARY_TABLESPACE, PROFILE
+ from dba_users where upper(username) = upper('$USR');
+
+-- INITIAL_RSRC_CONSUMER_GROUP, EXTERNAL_NAME, PASSWORD_VERSIONS, EDITIONS_ENABLED, AUTHENTICATION_TYPE
+
+prompt TABLE_PRIVS
+select * from dba_tab_privs where upper(grantee) = upper('$USR');
+
+prompt ROLE_PRIVS
+select * from dba_role_privs where upper(grantee) = upper('$USR');
+
+prompt SYS_PRIVS
+select * from dba_sys_privs where upper(grantee) = upper('$USR');
+
+prompt OBJECTS
+select object_type, count(1)
+  from dba_objects
+ where upper(owner) = upper('$USR')
+ group by object_type;
+
+prompt SEGMENTS
+select segment_type, tablespace_name, count(1), sum(bytes)/1024/1024 MB
+  from dba_segments
+ where upper(owner) = upper('$USR')
+ group by segment_type, tablespace_name
+ order by segment_type, tablespace_name;
+
+
+" | sqlplus -s ${SYSCONN}@$DB
+
+

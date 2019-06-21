@@ -1,0 +1,42 @@
+
+. /cloudsfs1/jenkins/OracleEnv.h
+DB=$ORACLE_SID
+OWNER_CLAUSE=1=1
+ORDER=asc
+
+TMPFILE=/tmp/mv$$.tmp
+
+while [ $# -ge 1 ]; do
+
+   opt=$1
+ 
+   case $opt in 
+	-d) shift; DB=$1; shift;;
+	-o) shift; OWNER_CLAUSE="owner = '$1'"; shift;;
+	-r) shift; ORDER=desc ;;
+	 *) echo "I don't know what $opt is..."; exit 2;;
+   esac
+
+done
+
+echo "
+
+whenever sqlerror exit sql.sqlcode
+set pages 500 lines 200 feedback off
+col next format a20
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+ select owner, name, last_refresh, next
+	, REFRESH_METHOD
+	, REFRESH_MODE
+   from dba_snapshots
+  where $OWNER_CLAUSE
+    and last_refresh > sysdate - 365
+  order by last_refresh $ORDER , name;
+
+" | sqlplus -s $SYSCONN@$DB
+
+
+retcode=$?
+

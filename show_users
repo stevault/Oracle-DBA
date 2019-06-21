@@ -1,0 +1,30 @@
+
+
+if [ $# -lt 1 ]; then
+echo Missing Parameters.
+echo "SYNTAX:  $0 <oracle sid>"
+exit 1
+fi
+
+export SID=$1
+USR=sys
+echo $SID  | grep -i '^ca'
+[ $? -ne 0 ] && PWD=gupta2oo9 || PWD=gupta2o14
+CONN=${USR}/${PWD}@${SID}
+
+$ORACLE_HOME/bin/sqlplus -s "$CONN as sysdba" << EOF
+
+whenever sqlerror exit sql.sqlcode
+
+set lines 200 pages 0 feedback off verify off define off
+
+ select '$SID' || ',' ||  username || ',' ||  created || ',' || account_status
+   from dba_users
+  where username not in ('SYS','SYSTEM')
+    and account_status not in ('LOCKED','EXPIRED & LOCKED')
+  order by username
+/
+
+
+EOF
+

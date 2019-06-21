@@ -1,0 +1,65 @@
+CURTIME=`date '+%Y%m%d%H%M'`
+
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+cr_ASH () {
+
+echo "
+
+prompt create table ash_$CURTIME
+create table ash_$CURTIME
+as
+select sysdate cur_date_time,
+	x.*
+   FROM gv\$active_session_history x
+  WHERE 1=0
+/
+
+" | sqlplus -s awdba/awdba@$DB
+
+} 
+
+ins_ASH () {
+
+echo "
+
+prompt insert into ash_$CURTIME from gv\$active_session_history
+insert into ash_$CURTIME
+select sysdate cur_date_time,
+	x.*
+   FROM gv\$active_session_history x
+/
+
+commit;
+
+select min(sample_time), max(sample_time) from ash_$CURTIME ;
+
+" | sqlplus -s awdba/awdba@$DB
+
+}
+
+## MAIN ()
+
+cr_ASH
+
+ins_ASH
+
+
+
