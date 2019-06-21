@@ -1,0 +1,57 @@
+DB=$ORACLE_SID
+OWNERCLAUSE="1=1"
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameter - table_name."
+   exit 1
+fi
+
+OBJECT=$1
+shift
+
+############################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+ -owner) OWNERCLAUSE="owner = upper('$1')" ; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+############################################################
+echo "
+
+set feedback off
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+set feedback 20 linesize 180 pagesize 300
+
+col owner format a13
+col table_name format a40
+col column_name format a40
+col data_type format a40
+col grantor format a13
+col privilege format a20
+col degree format a7
+
+ttitle center "TABLE LAYOUT"  skip 2
+
+ select 
+  owner, table_name,
+   column_id, column_name, data_type, data_scale, data_precision
+   from dba_tab_columns
+  where table_name = upper('$OBJECT')
+   and $OWNERCLAUSE
+  order by owner, column_id;
+
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
+
+

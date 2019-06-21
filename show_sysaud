@@ -1,0 +1,83 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+col userhost format a30
+col ntimestamp# format a30
+col userid format a20
+col terminal format a20
+col OSUSER format a20
+col objname format a50
+col month format a20
+
+set lines 300
+
+select to_char(cast(ntimestamp# as date),'YYYYMM') month
+ ,NTIMESTAMP#
+ ,USERID
+-- , SESSIONID
+-- , ENTRYID
+-- TIMESTAMP#
+ ,USERHOST
+ ,TERMINAL
+, STATEMENT
+ ,ACTION#
+ ,RETURNCODE
+-- ,OBJ\$CREATOR objcreator
+ ,OBJ\$NAME objname
+--, a.*
+-- AUTH\$PRIVILEGES
+-- AUTH\$GRANTEE
+-- NEW\$OWNER
+-- NEW\$NAME
+-- SES\$ACTIONS
+-- , SES\$tID
+-- LOGOFF\$LREAD
+-- LOGOFF\$PREAD
+-- LOGOFF\$LWRITE
+-- LOGOFF\$DEAD
+-- LOGOFF\$TIME
+-- COMMENT\$TEXT
+-- , CLIENTID
+ , SPARE1 OSUSER
+-- , SPARE2
+-- OBJ\$LABEL
+-- SES\$LABEL
+-- PRIV\$USED
+-- SESSIONCPU
+-- PROXY\$SID
+--, USER\$GUID
+-- INSTANCE#
+-- PROCESS#
+-- XID
+-- AUDITID
+-- SCN
+-- DBID
+-- ,SQLBIND
+-- ,SQLTEXT
+-- OBJ\$EDITION
+--	, count(1)
+from sys.aud\$ a
+where 1=1
+  and to_char(cast(ntimestamp# as date),'YYYYMM') >= '201902'
+  and userid not in ('SYS','SYSTEM','DBSNMP')
+--group by to_char(cast(ntimestamp# as date),'YYYYMM'), userid
+order by 1, 2
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

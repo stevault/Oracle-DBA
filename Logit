@@ -1,0 +1,27 @@
+
+if [ $# -lt 1 ]; then
+   echo "You're missing a command to capture."
+   exit 2
+fi
+
+Logit_TSTAMP=`date '+%Y%m%d%H%M%S`
+Logit_DIRECTORY=/home/oracle/awdba/logit
+Logit_LOGFILE=$Logit_DIRECTORY/`basename $1`.log.$Logit_TSTAMP
+
+set -o pipefail
+
+echo -e "\nRunning $*"
+echo -e "------------"
+$* | tee -a $Logit_LOGFILE
+Logit_RETCODE=$?
+echo -e "------------"
+
+echo Logit_RETCODE - $Logit_RETCODE
+if [ $Logit_RETCODE  -ne 0 ]; then
+   echo "ERROR executing $1!!"
+fi
+
+echo -e "Output captured in $Logit_LOGFILE\n"
+
+exit $Logit_RETCODE
+

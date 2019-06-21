@@ -1,0 +1,702 @@
+dw_st: SYSTEM> 
+dw_st: SYSTEM> Rem ******** List schemas and objects ********
+dw_st: SYSTEM> PROMPT
+
+dw_st: SYSTEM> PROMPT All user named objects owned by schema accounts
+All user named objects owned by schema accounts
+dw_st: SYSTEM> 
+dw_st: SYSTEM>  SELECT   owner, object_type, object_name, status
+  2   FROM     dba_objects
+  3   WHERE    owner in ('HR','OE','SH','PM','IX','BI')
+  4   AND      object_name NOT LIKE 'SYS%'
+  5   ORDER BY 1,2,3,4;
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+BI                   SYNONYM              CHANNELS                       VALID
+BI                   SYNONYM              COSTS                          VALID
+BI                   SYNONYM              COUNTRIES                      VALID
+BI                   SYNONYM              CUSTOMERS                      VALID
+BI                   SYNONYM              PRODUCTS                       VALID
+BI                   SYNONYM              PROMOTIONS                     VALID
+BI                   SYNONYM              SALES                          VALID
+BI                   SYNONYM              TIMES                          VALID
+HR                   INDEX                COUNTRY_C_ID_PK                VALID
+HR                   INDEX                DEPT_ID_PK                     VALID
+HR                   INDEX                DEPT_LOCATION_IX               VALID
+HR                   INDEX                EMP_DEPARTMENT_IX              VALID
+HR                   INDEX                EMP_EMAIL_UK                   VALID
+HR                   INDEX                EMP_EMP_ID_PK                  VALID
+HR                   INDEX                EMP_JOB_IX                     VALID
+HR                   INDEX                EMP_MANAGER_IX                 VALID
+HR                   INDEX                EMP_NAME_IX                    VALID
+HR                   INDEX                JHIST_DEPARTMENT_IX            VALID
+HR                   INDEX                JHIST_EMPLOYEE_IX              VALID
+HR                   INDEX                JHIST_EMP_ID_ST_DATE_PK        VALID
+HR                   INDEX                JHIST_JOB_IX                   VALID
+HR                   INDEX                JOB_ID_PK                      VALID
+HR                   INDEX                LOC_CITY_IX                    VALID
+HR                   INDEX                LOC_COUNTRY_IX                 VALID
+HR                   INDEX                LOC_ID_PK                      VALID
+HR                   INDEX                LOC_STATE_PROVINCE_IX          VALID
+HR                   INDEX                REG_ID_PK                      VALID
+HR                   PROCEDURE            ADD_JOB_HISTORY                VALID
+HR                   PROCEDURE            SECURE_DML                     VALID
+HR                   SEQUENCE             DEPARTMENTS_SEQ                VALID
+HR                   SEQUENCE             EMPLOYEES_SEQ                  VALID
+HR                   SEQUENCE             LOCATIONS_SEQ                  VALID
+HR                   TABLE                COUNTRIES                      VALID
+HR                   TABLE                DEPARTMENTS                    VALID
+HR                   TABLE                EMPLOYEES                      VALID
+HR                   TABLE                JOBS                           VALID
+HR                   TABLE                JOB_HISTORY                    VALID
+HR                   TABLE                LOCATIONS                      VALID
+HR                   TABLE                REGIONS                        VALID
+HR                   TRIGGER              SECURE_EMPLOYEES               VALID
+HR                   TRIGGER              UPDATE_JOB_HISTORY             VALID
+HR                   VIEW                 EMP_DETAILS_VIEW               VALID
+IX                   EVALUATION CONTEXT   AQ$_ORDERS_QUEUETABLE_V        VALID
+IX                   EVALUATION CONTEXT   AQ$_STREAMS_QUEUE_TABLE_V      VALID
+IX                   INDEX                AQ$_STREAMS_QUEUE_TABLE_Y      VALID
+IX                   QUEUE                AQ$_ORDERS_QUEUETABLE_E        VALID
+IX                   QUEUE                AQ$_STREAMS_QUEUE_TABLE_E      VALID
+IX                   QUEUE                ORDERS_QUEUE                   VALID
+IX                   QUEUE                STREAMS_QUEUE                  VALID
+IX                   RULE SET             ORDERS_QUEUE_N                 VALID
+IX                   RULE SET             ORDERS_QUEUE_R                 VALID
+IX                   RULE SET             STREAMS_QUEUE_N                VALID
+IX                   RULE SET             STREAMS_QUEUE_R                VALID
+IX                   SEQUENCE             AQ$_ORDERS_QUEUETABLE_N        VALID
+IX                   SEQUENCE             AQ$_STREAMS_QUEUE_TABLE_N      VALID
+IX                   TABLE                AQ$_ORDERS_QUEUETABLE_G        VALID
+IX                   TABLE                AQ$_ORDERS_QUEUETABLE_H        VALID
+IX                   TABLE                AQ$_ORDERS_QUEUETABLE_I        VALID
+IX                   TABLE                AQ$_ORDERS_QUEUETABLE_L        VALID
+IX                   TABLE                AQ$_ORDERS_QUEUETABLE_S        VALID
+IX                   TABLE                AQ$_ORDERS_QUEUETABLE_T        VALID
+IX                   TABLE                AQ$_STREAMS_QUEUE_TABLE_C      VALID
+IX                   TABLE                AQ$_STREAMS_QUEUE_TABLE_G      VALID
+IX                   TABLE                AQ$_STREAMS_QUEUE_TABLE_H      VALID
+IX                   TABLE                AQ$_STREAMS_QUEUE_TABLE_I      VALID
+IX                   TABLE                AQ$_STREAMS_QUEUE_TABLE_L      VALID
+IX                   TABLE                AQ$_STREAMS_QUEUE_TABLE_S      VALID
+IX                   TABLE                AQ$_STREAMS_QUEUE_TABLE_T      VALID
+IX                   TABLE                ORDERS_QUEUETABLE              VALID
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+IX                   TABLE                STREAMS_QUEUE_TABLE            VALID
+IX                   TYPE                 ORDER_EVENT_TYP                VALID
+IX                   VIEW                 AQ$ORDERS_QUEUETABLE           VALID
+IX                   VIEW                 AQ$ORDERS_QUEUETABLE_R         VALID
+IX                   VIEW                 AQ$ORDERS_QUEUETABLE_S         VALID
+IX                   VIEW                 AQ$STREAMS_QUEUE_TABLE         VALID
+IX                   VIEW                 AQ$STREAMS_QUEUE_TABLE_R       VALID
+IX                   VIEW                 AQ$STREAMS_QUEUE_TABLE_S       VALID
+IX                   VIEW                 AQ$_ORDERS_QUEUETABLE_F        VALID
+IX                   VIEW                 AQ$_STREAMS_QUEUE_TABLE_F      VALID
+OE                   FUNCTION             GET_PHONE_NUMBER_F             VALID
+OE                   INDEX                ACTION_TABLE_MEMBERS           VALID
+OE                   INDEX                CUSTOMERS_PK                   VALID
+OE                   INDEX                CUST_ACCOUNT_MANAGER_IX        VALID
+OE                   INDEX                CUST_EMAIL_IX                  VALID
+OE                   INDEX                CUST_LNAME_IX                  VALID
+OE                   INDEX                CUST_UPPER_NAME_IX             VALID
+OE                   INDEX                INVENTORY_IX                   VALID
+OE                   INDEX                INV_PRODUCT_IX                 VALID
+OE                   INDEX                ITEM_ORDER_IX                  VALID
+OE                   INDEX                ITEM_PRODUCT_IX                VALID
+OE                   INDEX                LINEITEM_TABLE_MEMBERS         VALID
+OE                   INDEX                ORDER_ITEMS_PK                 VALID
+OE                   INDEX                ORDER_ITEMS_UK                 VALID
+OE                   INDEX                ORDER_PK                       VALID
+OE                   INDEX                ORD_CUSTOMER_IX                VALID
+OE                   INDEX                ORD_ORDER_DATE_IX              VALID
+OE                   INDEX                ORD_SALES_REP_IX               VALID
+OE                   INDEX                PRD_DESC_PK                    VALID
+OE                   INDEX                PRODUCT_INFORMATION_PK         VALID
+OE                   INDEX                PROD_NAME_IX                   VALID
+OE                   INDEX                PROD_SUPPLIER_IX               VALID
+OE                   INDEX                PROMO_ID_PK                    VALID
+OE                   INDEX                WAREHOUSES_PK                  VALID
+OE                   INDEX                WHS_LOCATION_IX                VALID
+OE                   LOB                  EXTRADATA566_L                 VALID
+OE                   LOB                  NAMESPACES567_L                VALID
+OE                   SEQUENCE             ORDERS_SEQ                     VALID
+OE                   SYNONYM              COUNTRIES                      VALID
+OE                   SYNONYM              DEPARTMENTS                    VALID
+OE                   SYNONYM              EMPLOYEES                      VALID
+OE                   SYNONYM              JOBS                           VALID
+OE                   SYNONYM              JOB_HISTORY                    VALID
+OE                   SYNONYM              LOCATIONS                      VALID
+OE                   TABLE                ACTION_TABLE                   VALID
+OE                   TABLE                CATEGORIES_TAB                 VALID
+OE                   TABLE                CUSTOMERS                      VALID
+OE                   TABLE                INVENTORIES                    VALID
+OE                   TABLE                LINEITEM_TABLE                 VALID
+OE                   TABLE                ORDERS                         VALID
+OE                   TABLE                ORDER_ITEMS                    VALID
+OE                   TABLE                PRODUCT_DESCRIPTIONS           VALID
+OE                   TABLE                PRODUCT_INFORMATION            VALID
+OE                   TABLE                PRODUCT_REF_LIST_NESTEDTAB     VALID
+OE                   TABLE                PROMOTIONS                     VALID
+OE                   TABLE                PURCHASEORDER                  VALID
+OE                   TABLE                SUBCATEGORY_REF_LIST_NESTEDTAB VALID
+OE                   TABLE                WAREHOUSES                     VALID
+OE                   TRIGGER              INSERT_ORD_LINE                VALID
+OE                   TRIGGER              ORDERS_ITEMS_TRG               VALID
+OE                   TRIGGER              ORDERS_TRG                     VALID
+OE                   TRIGGER              PURCHASEORDER$xd               VALID
+OE                   TYPE                 ACTIONS_T                      VALID
+OE                   TYPE                 ACTION_T                       VALID
+OE                   TYPE                 ACTION_V                       VALID
+OE                   TYPE                 CATALOG_TYP                    VALID
+OE                   TYPE                 CATALOG_TYP                    VALID
+OE                   TYPE                 CATEGORY_TYP                   VALID
+OE                   TYPE                 CATEGORY_TYP                   VALID
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+OE                   TYPE                 COMPOSITE_CATEGORY_TYP         VALID
+OE                   TYPE                 COMPOSITE_CATEGORY_TYP         VALID
+OE                   TYPE                 CORPORATE_CUSTOMER_TYP         VALID
+OE                   TYPE                 CUSTOMER_TYP                   VALID
+OE                   TYPE                 CUST_ADDRESS_TYP               VALID
+OE                   TYPE                 INVENTORY_LIST_TYP             VALID
+OE                   TYPE                 INVENTORY_TYP                  VALID
+OE                   TYPE                 LEAF_CATEGORY_TYP              VALID
+OE                   TYPE                 LEAF_CATEGORY_TYP              VALID
+OE                   TYPE                 LINEITEMS_T                    VALID
+OE                   TYPE                 LINEITEM_T                     VALID
+OE                   TYPE                 LINEITEM_V                     VALID
+OE                   TYPE                 ORDER_ITEM_LIST_TYP            VALID
+OE                   TYPE                 ORDER_ITEM_TYP                 VALID
+OE                   TYPE                 ORDER_LIST_TYP                 VALID
+OE                   TYPE                 ORDER_TYP                      VALID
+OE                   TYPE                 PART_T                         VALID
+OE                   TYPE                 PHONE_LIST_TYP                 VALID
+OE                   TYPE                 PRODUCT_INFORMATION_TYP        VALID
+OE                   TYPE                 PRODUCT_REF_LIST_TYP           VALID
+OE                   TYPE                 PURCHASEORDER_T                VALID
+OE                   TYPE                 REJECTION_T                    VALID
+OE                   TYPE                 SHIPPING_INSTRUCTIONS_T        VALID
+OE                   TYPE                 SUBCATEGORY_REF_LIST_TYP       VALID
+OE                   TYPE                 WAREHOUSE_TYP                  VALID
+OE                   TYPE BODY            CATALOG_TYP                    VALID
+OE                   TYPE BODY            COMPOSITE_CATEGORY_TYP         VALID
+OE                   TYPE BODY            LEAF_CATEGORY_TYP              VALID
+OE                   VIEW                 ACCOUNT_MANAGERS               VALID
+OE                   VIEW                 BOMBAY_INVENTORY               VALID
+OE                   VIEW                 CUSTOMERS_VIEW                 VALID
+OE                   VIEW                 OC_CORPORATE_CUSTOMERS         VALID
+OE                   VIEW                 OC_CUSTOMERS                   VALID
+OE                   VIEW                 OC_INVENTORIES                 VALID
+OE                   VIEW                 OC_ORDERS                      VALID
+OE                   VIEW                 OC_PRODUCT_INFORMATION         VALID
+OE                   VIEW                 ORDERS_VIEW                    VALID
+OE                   VIEW                 PRODUCTS                       VALID
+OE                   VIEW                 PRODUCT_PRICES                 VALID
+OE                   VIEW                 SYDNEY_INVENTORY               VALID
+OE                   VIEW                 TORONTO_INVENTORY              VALID
+PM                   INDEX                ONLINEMEDIA_PK                 VALID
+PM                   INDEX                PRINTMEDIA_PK                  VALID
+PM                   TABLE                ONLINE_MEDIA                   VALID
+PM                   TABLE                PRINT_MEDIA                    VALID
+PM                   TABLE                TEXTDOCS_NESTEDTAB             VALID
+PM                   TYPE                 ADHEADER_TYP                   VALID
+PM                   TYPE                 TEXTDOC_TAB                    VALID
+PM                   TYPE                 TEXTDOC_TYP                    VALID
+SH                   DIMENSION            CHANNELS_DIM                   VALID
+SH                   DIMENSION            CUSTOMERS_DIM                  VALID
+SH                   DIMENSION            PRODUCTS_DIM                   VALID
+SH                   DIMENSION            PROMOTIONS_DIM                 VALID
+SH                   DIMENSION            TIMES_DIM                      VALID
+SH                   INDEX                CHANNELS_PK                    VALID
+SH                   INDEX                COSTS_PROD_BIX                 VALID
+SH                   INDEX                COSTS_TIME_BIX                 VALID
+SH                   INDEX                COUNTRIES_PK                   VALID
+SH                   INDEX                CUSTOMERS_GENDER_BIX           VALID
+SH                   INDEX                CUSTOMERS_MARITAL_BIX          VALID
+SH                   INDEX                CUSTOMERS_PK                   VALID
+SH                   INDEX                CUSTOMERS_YOB_BIX              VALID
+SH                   INDEX                DR$SUP_TEXT_IDX$X              VALID
+SH                   INDEX                FW_PSC_S_MV_CHAN_BIX           VALID
+SH                   INDEX                FW_PSC_S_MV_PROMO_BIX          VALID
+SH                   INDEX                FW_PSC_S_MV_SUBCAT_BIX         VALID
+SH                   INDEX                FW_PSC_S_MV_WD_BIX             VALID
+SH                   INDEX                PRODUCTS_PK                    VALID
+SH                   INDEX                PRODUCTS_PROD_CAT_IX           VALID
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+SH                   INDEX                PRODUCTS_PROD_STATUS_BIX       VALID
+SH                   INDEX                PRODUCTS_PROD_SUBCAT_IX        VALID
+SH                   INDEX                PROMO_PK                       VALID
+SH                   INDEX                SALES_CHANNEL_BIX              VALID
+SH                   INDEX                SALES_CUST_BIX                 VALID
+SH                   INDEX                SALES_PROD_BIX                 VALID
+SH                   INDEX                SALES_PROMO_BIX                VALID
+SH                   INDEX                SALES_TIME_BIX                 VALID
+SH                   INDEX                SUP_TEXT_IDX                   VALID
+SH                   INDEX                TIMES_PK                       VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_PROD_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      COSTS_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CHANNEL_BIX              VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_CUST_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROD_BIX                 VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_PROMO_BIX                VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   INDEX PARTITION      SALES_TIME_BIX                 VALID
+SH                   MATERIALIZED VIEW    CAL_MONTH_SALES_MV             VALID
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+SH                   MATERIALIZED VIEW    FWEEK_PSCAT_SALES_MV           VALID
+SH                   TABLE                CAL_MONTH_SALES_MV             VALID
+SH                   TABLE                CHANNELS                       VALID
+SH                   TABLE                COSTS                          VALID
+SH                   TABLE                COUNTRIES                      VALID
+SH                   TABLE                CUSTOMERS                      VALID
+SH                   TABLE                DIMENSION_EXCEPTIONS           VALID
+SH                   TABLE                DR$SUP_TEXT_IDX$I              VALID
+SH                   TABLE                DR$SUP_TEXT_IDX$K              VALID
+SH                   TABLE                DR$SUP_TEXT_IDX$N              VALID
+SH                   TABLE                DR$SUP_TEXT_IDX$R              VALID
+SH                   TABLE                FWEEK_PSCAT_SALES_MV           VALID
+SH                   TABLE                PRODUCTS                       VALID
+SH                   TABLE                PROMOTIONS                     VALID
+SH                   TABLE                SALES                          VALID
+SH                   TABLE                SALES_TRANSACTIONS_EXT         VALID
+SH                   TABLE                SUPPLEMENTARY_DEMOGRAPHICS     VALID
+SH                   TABLE                TIMES                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      COSTS                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   TABLE PARTITION      SALES                          VALID
+SH                   VIEW                 PROFITS                        VALID
+
+489 rows selected.
+
+dw_st: SYSTEM> 
+dw_st: SYSTEM> 
+dw_st: SYSTEM> PROMPT
+
+dw_st: SYSTEM> PROMPT All SYS named objects owned by schema accounts
+All SYS named objects owned by schema accounts
+dw_st: SYSTEM> 
+dw_st: SYSTEM>  SELECT    owner, object_type, object_name, status
+  2   FROM     dba_objects
+  3   WHERE    owner in ('HR','OE','SH','PM','IX','BI')
+  4   AND      object_name LIKE 'SYS%'
+  5   ORDER BY 2,1,3;
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+IX                   INDEX                SYS_C0010846                   VALID
+IX                   INDEX                SYS_C0010849                   VALID
+IX                   INDEX                SYS_C0010854                   VALID
+IX                   INDEX                SYS_C0010857                   VALID
+IX                   INDEX                SYS_IL0000074051C00036$$       VALID
+IX                   INDEX                SYS_IL0000074067C00028$$       VALID
+IX                   INDEX                SYS_IL0000074067C00029$$       VALID
+IX                   INDEX                SYS_IOT_TOP_74057              VALID
+IX                   INDEX                SYS_IOT_TOP_74059              VALID
+IX                   INDEX                SYS_IOT_TOP_74062              VALID
+IX                   INDEX                SYS_IOT_TOP_74065              VALID
+IX                   INDEX                SYS_IOT_TOP_74075              VALID
+IX                   INDEX                SYS_IOT_TOP_74077              VALID
+IX                   INDEX                SYS_IOT_TOP_74080              VALID
+IX                   INDEX                SYS_IOT_TOP_74083              VALID
+IX                   INDEX                SYS_IOT_TOP_74085              VALID
+OE                   INDEX                SYS_C0011033                   VALID
+OE                   INDEX                SYS_C0011034                   VALID
+OE                   INDEX                SYS_C0011037                   VALID
+OE                   INDEX                SYS_C0011038                   VALID
+OE                   INDEX                SYS_C0011039                   VALID
+OE                   INDEX                SYS_C0011040                   VALID
+OE                   INDEX                SYS_C0011041                   VALID
+OE                   INDEX                SYS_FK0000074515N00007$        VALID
+OE                   INDEX                SYS_FK0000074515N00009$        VALID
+OE                   INDEX                SYS_IL0000073967C00022$$       VALID
+OE                   INDEX                SYS_IL0000073967C00023$$       VALID
+OE                   INDEX                SYS_IL0000073976C00003$$       VALID
+OE                   INDEX                SYS_IL0000073976C00012$$       VALID
+OE                   INDEX                SYS_IL0000073976C00013$$       VALID
+OE                   INDEX                SYS_IL0000074465C00004$$       VALID
+OE                   INDEX                SYS_IL0000074465C00005$$       VALID
+OE                   INDEX                SYS_IL0000074465C00008$$       VALID
+OE                   INDEX                SYS_IL0000074465C00012$$       VALID
+OE                   INDEX                SYS_IL0000074465C00017$$       VALID
+OE                   INDEX                SYS_IL0000074465C00026$$       VALID
+OE                   INDEX                SYS_IL0000074465C00033$$       VALID
+OE                   INDEX                SYS_IL0000074466C00004$$       VALID
+OE                   INDEX                SYS_IL0000074470C00005$$       VALID
+OE                   INDEX                SYS_IL0000074470C00010$$       VALID
+PM                   INDEX                SYS_C0010844                   VALID
+PM                   INDEX                SYS_FK0000073534N00007$        VALID
+PM                   INDEX                SYS_IL0000074006C00003$$       VALID
+PM                   INDEX                SYS_IL0000074006C00017$$       VALID
+PM                   INDEX                SYS_IL0000074006C00019$$       VALID
+PM                   INDEX                SYS_IL0000074006C00034$$       VALID
+PM                   INDEX                SYS_IL0000074006C00042$$       VALID
+PM                   INDEX                SYS_IL0000074006C00054$$       VALID
+PM                   INDEX                SYS_IL0000074006C00062$$       VALID
+PM                   INDEX                SYS_IL0000074006C00069$$       VALID
+PM                   INDEX                SYS_IL0000074006C00071$$       VALID
+PM                   INDEX                SYS_IL0000074006C00080$$       VALID
+PM                   INDEX                SYS_IL0000074031C00003$$       VALID
+PM                   INDEX                SYS_IL0000074031C00004$$       VALID
+PM                   INDEX                SYS_IL0000074031C00005$$       VALID
+PM                   INDEX                SYS_IL0000074031C00006$$       VALID
+PM                   INDEX                SYS_IL0000074031C00009$$       VALID
+PM                   INDEX                SYS_IL0000074031C00015$$       VALID
+PM                   INDEX                SYS_IL0000074032C00004$$       VALID
+SH                   INDEX                SYS_IL0000074371C00006$$       VALID
+SH                   INDEX                SYS_IL0000074377C00002$$       VALID
+SH                   INDEX                SYS_IOT_TOP_74375              VALID
+SH                   INDEX                SYS_IOT_TOP_74380              VALID
+IX                   LOB                  SYS_LOB0000074051C00036$$      VALID
+IX                   LOB                  SYS_LOB0000074067C00028$$      VALID
+IX                   LOB                  SYS_LOB0000074067C00029$$      VALID
+OE                   LOB                  SYS_LOB0000073967C00022$$      VALID
+OE                   LOB                  SYS_LOB0000073967C00023$$      VALID
+OE                   LOB                  SYS_LOB0000073976C00003$$      VALID
+
+OWNER                OBJECT_TYPE          OBJECT_NAME                    STATUS
+-------------------- -------------------- ------------------------------ --------
+OE                   LOB                  SYS_LOB0000073976C00012$$      VALID
+OE                   LOB                  SYS_LOB0000073976C00013$$      VALID
+OE                   LOB                  SYS_LOB0000074466C00004$$      VALID
+OE                   LOB                  SYS_LOB0000074470C00005$$      VALID
+OE                   LOB                  SYS_LOB0000074470C00010$$      VALID
+OE                   LOB                  SYS_XDBPD$561_L                VALID
+OE                   LOB                  SYS_XDBPD$562_L                VALID
+OE                   LOB                  SYS_XDBPD$563_L                VALID
+OE                   LOB                  SYS_XDBPD$564_L                VALID
+OE                   LOB                  SYS_XDBPD$565_L                VALID
+PM                   LOB                  SYS_LOB0000074006C00003$$      VALID
+PM                   LOB                  SYS_LOB0000074006C00017$$      VALID
+PM                   LOB                  SYS_LOB0000074006C00019$$      VALID
+PM                   LOB                  SYS_LOB0000074006C00034$$      VALID
+PM                   LOB                  SYS_LOB0000074006C00042$$      VALID
+PM                   LOB                  SYS_LOB0000074006C00054$$      VALID
+PM                   LOB                  SYS_LOB0000074006C00062$$      VALID
+PM                   LOB                  SYS_LOB0000074006C00069$$      VALID
+PM                   LOB                  SYS_LOB0000074006C00071$$      VALID
+PM                   LOB                  SYS_LOB0000074006C00080$$      VALID
+PM                   LOB                  SYS_LOB0000074031C00003$$      VALID
+PM                   LOB                  SYS_LOB0000074031C00004$$      VALID
+PM                   LOB                  SYS_LOB0000074031C00005$$      VALID
+PM                   LOB                  SYS_LOB0000074031C00006$$      VALID
+PM                   LOB                  SYS_LOB0000074031C00009$$      VALID
+PM                   LOB                  SYS_LOB0000074031C00015$$      VALID
+PM                   LOB                  SYS_LOB0000074032C00004$$      VALID
+SH                   LOB                  SYS_LOB0000074371C00006$$      VALID
+SH                   LOB                  SYS_LOB0000074377C00002$$      VALID
+IX                   TABLE                SYS_IOT_OVER_74062             VALID
+IX                   TABLE                SYS_IOT_OVER_74080             VALID
+OE                   TYPE                 SYS_YOID0000074524$            VALID
+OE                   TYPE                 SYS_YOID0000074526$            VALID
+OE                   TYPE                 SYS_YOID0000074528$            VALID
+OE                   TYPE                 SYS_YOID0000074530$            VALID
+OE                   TYPE                 SYS_YOID0000074532$            VALID
+
+105 rows selected.
+
+dw_st: SYSTEM> 
+dw_st: SYSTEM> Rem ******** Drop Sample Schemas, cascade to objects ********
+dw_st: SYSTEM> PROMPT
+
+dw_st: SYSTEM> PROMPT Dropping Sample Schemas
+Dropping Sample Schemas
+dw_st: SYSTEM> 
+dw_st: SYSTEM> DROP USER hr CASCADE;
+
+User dropped.
+
+dw_st: SYSTEM> DROP USER oe CASCADE;
+
+User dropped.
+
+dw_st: SYSTEM> DROP USER pm CASCADE;
+
+User dropped.
+
+dw_st: SYSTEM> DROP USER ix CASCADE;
+
+User dropped.
+
+dw_st: SYSTEM> DROP USER sh CASCADE;
+
+User dropped.
+
+dw_st: SYSTEM> DROP USER bi CASCADE;
+
+User dropped.
+
+dw_st: SYSTEM> 
+dw_st: SYSTEM> 
+dw_st: SYSTEM> Rem ******** Verify that all Sample Schemas and objects have been dropped ********
+dw_st: SYSTEM> PROMPT
+
+dw_st: SYSTEM> PROMPT Verifying drop of Sample Schemas
+Verifying drop of Sample Schemas
+dw_st: SYSTEM> 
+dw_st: SYSTEM> SELECT   owner, object_type, object_name
+  2   FROM     dba_objects
+  3   WHERE    owner in ('HR','OE','SH','PM','IX','BI')
+  4   ORDER BY 1,2,3;
+
+no rows selected
+
+dw_st: SYSTEM> 
+dw_st: SYSTEM> SPOOL OFF

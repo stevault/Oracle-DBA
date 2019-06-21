@@ -12,7 +12,11 @@ while [ $# -ge 1 ];do
 
   case $opt in
         -d) DB=$1; shift ;;
+<<<<<<< HEAD
    -swtime) COLS="sysdate- to_dsinterval(value)"; PAGES=100 ;;
+=======
+     -date) COLS="sysdate- to_dsinterval(value) snaptime"; PAGES=0 ;;
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
         -v) COLS="sysdate, sysdate- to_dsinterval(value) late_date, sysdate - (sysdate- to_dsinterval(value)) latency" ; PAGES=100 ;;
          *) echo "I don't know what $opt is...\n" ; exit 2;;
   esac
@@ -27,11 +31,23 @@ echo -e "
 
  set pagesize $PAGES feedback off
 
+<<<<<<< HEAD
+=======
+ col lag_time format 99999.999
+ col recovery_time format 99999.999
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
  col latency format 99999.999
 
  alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 
+<<<<<<< HEAD
  select $COLS from v\$dataguard_stats where name = 'apply lag';
+=======
+ with lag as (select value from v\$dataguard_stats where name = 'apply lag')
+    , est as (select value from v\$dataguard_stats where name = 'apply finish time')
+  select lag.value lag_time --, est.value recovery_Time
+  from lag, est;
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 " | sqlplus -s $SYSCONN@$DB as sysdba
 

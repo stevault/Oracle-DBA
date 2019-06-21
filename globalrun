@@ -1,0 +1,10 @@
+#!/bin/ksh
+[ $# -lt 1 ] && exit 2
+
+COMMAND=$*
+
+for h in $ALLHOSTS
+do
+  echo -e "$h \c "
+  ssh $h $COMMAND
+done

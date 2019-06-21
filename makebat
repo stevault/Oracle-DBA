@@ -1,0 +1,85 @@
+
+OVERWRITE=N
+REPLACE=N
+BASE=`basename $0`
+TMPFILE=/var/tmp/${BASE}.$$.tmp
+
+if [ $# -lt 1 ]; then
+   echo "MISSING PARAMETERS."
+   echo "SYNTAX:  $0 <infile> [ <outfile> ] [ -opts ]"
+   exit 2
+fi
+
+INFILE=$1
+shift
+
+if [ $# -ge 1 ]; then
+
+  OUTFILE=$1
+  shift
+
+else
+
+  REPLACE=Y
+  OUTFILE=$TMPFILE
+
+fi
+
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -o) OVERWRITE=Y ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+if [ ! -f $INFILE ]; then
+   echo "ERROR:  $INFILE not found."
+   exit 1
+fi
+
+
+if [ -f $OUTFILE ]; then
+   if [ $OVERWRITE = 'Y' ]; then
+      rm -f $OUTFILE
+   else
+      echo "ERROR:  $OUTFILE found."
+      echo -e "Overwrite? =>\c"
+      read yorn
+
+      if [ $yorn = 'y' -o $yorn = 'Y' -o $OVERWRITE = 'Y' ]; then
+         rm -f $OUTFILE
+      else
+         exit 1
+      fi
+   fi
+fi
+
+
+cat /home/oracle/awdba/dbparm.h > $OUTFILE
+echo "echo \"" >> $OUTFILE
+cat $INFILE >> $OUTFILE
+echo "\" | \$ORACLE_HOME/bin/sqlplus -s \$SYSCONN@\$DB " >> $OUTFILE
+chmod 744 $OUTFILE
+
+
+if [ $REPLACE = 'Y' ]; then
+    mv $OUTFILE $INFILE 
+    ls -l $INFILE
+else
+    ls -l $OUTFILE
+fi
+
+
+
+
+

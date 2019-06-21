@@ -21,12 +21,16 @@ done
 retcode=0
 df -P | while read a b c d e f g
 do
+<<<<<<< HEAD
    if [ "$e" = "Capacity" ]; then
      echo "skipp"
    fi
 
    Cap=`echo $e | sed 's;%;;'`
 
+=======
+   Cap=`echo $e | sed 's;%;;'`
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
    if [ $Cap -gt $THRESHOLD ]; then
      echo "$f is running out of space ($e used)"
      retcode=1

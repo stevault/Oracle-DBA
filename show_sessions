@@ -1,6 +1,9 @@
 
 DB=$ORACLE_SID
+<<<<<<< HEAD
 EXCLUDE_BG="not (osuser='oracle' and program like 'oracle@%(____)')"
+=======
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 ##################################################################################
 while [ $# -ge 1 ]; do
@@ -11,7 +14,10 @@ while [ $# -ge 1 ]; do
   case $opt in
      -d) DB=$1; shift ;;
     -eq) OPERATOR=$1; shift ;;
+<<<<<<< HEAD
 -showbg) EXCLUDE_BG="1=1" ;;
+=======
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
       *) echo "I don't know what $opt is...\n" ; exit 2;;
   esac
 
@@ -46,9 +52,14 @@ select  inst_id, USERNAME,
  MACHINE,
  PROGRAM, 
  STATUS,
+<<<<<<< HEAD
  logon_time
    from gv\$session
   where $EXCLUDE_BG
+=======
+  logon_time
+   from gv\$session
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
   order by logon_time
 /
 

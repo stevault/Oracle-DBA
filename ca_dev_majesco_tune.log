@@ -1,0 +1,217 @@
+ca_dev: SYS> show sga
+
+Total System Global Area 2137886720 bytes
+Fixed Size                  2254952 bytes
+Variable Size            1224738712 bytes
+Database Buffers          905969664 bytes
+Redo Buffers                4923392 bytes
+ca_dev: SYS> show parameter cursor_sharing
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+cursor_sharing                       string      EXACT
+ca_dev: SYS> show parameter memory_target
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+memory_target                        big integer 2G
+ca_dev: SYS> show parameter memory_max_target
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+memory_max_target                    big integer 2G
+ca_dev: SYS> show parameter sga_target
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+sga_target                           big integer 0
+ca_dev: SYS> show parameter sga_max_size
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+sga_max_size                         big integer 2G
+ca_dev: SYS> show parameter pga
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+pga_aggregate_target                 big integer 0
+ca_dev: SYS> show parameter shared_poo
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+shared_pool_reserved_size            big integer 12M
+shared_pool_size                     big integer 0
+ca_dev: SYS> show parameter session_cached_cursors
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+session_cached_cursors               integer     50
+ca_dev: SYS> show parameter open_processes
+ca_dev: SYS> show parameter processes
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+aq_tm_processes                      integer     1
+db_writer_processes                  integer     1
+gcs_server_processes                 integer     0
+global_txn_processes                 integer     1
+job_queue_processes                  integer     1000
+log_archive_max_processes            integer     4
+processes                            integer     1000
+ca_dev: SYS> show parameter open_cursors
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+open_cursors                         integer     300
+ca_dev: SYS> show parameter cursor_sharing
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+cursor_sharing                       string      EXACT
+ca_dev: SYS> alter system set cursor_sharing = force scope=spfile;
+
+System altered.
+
+ca_dev: SYS> show parameter compatible
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+compatible                           string      11.2.0.2.0
+ca_dev: SYS> alter system set compatible = '11.2.0.4.0' SCOPE=spfile;
+
+System altered.
+
+ca_dev: SYS> show parameter memory_max_target
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+memory_max_target                    big integer 2G
+ca_dev: SYS> alter system set memory_max_target=12g scope=spfile;
+
+System altered.
+
+ca_dev: SYS> show parameter memory_target
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+memory_target                        big integer 2G
+ca_dev: SYS> alter system set memory_target = 12g scope=spfile;
+
+System altered.
+
+ca_dev: SYS> show parameter sga_max_size
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+sga_max_size                         big integer 2G
+ca_dev: SYS> alter system set sga_max_size=12g scope=spfile;
+
+System altered.
+
+ca_dev: SYS> show parameter sga_
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+sga_max_size                         big integer 2G
+sga_target                           big integer 0
+ca_dev: SYS> alter system reset sga_target ;
+alter system reset sga_target
+*
+ERROR at line 1:
+ORA-32010: cannot find entry to delete in SPFILE
+
+
+ca_dev: SYS> show parameter shared_poo
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+shared_pool_reserved_size            big integer 12M
+shared_pool_size                     big integer 0
+ca_dev: SYS> alter system set shared_pool_size=4G scope=spfile;
+
+System altered.
+
+ca_dev: SYS> show parameter pga
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+pga_aggregate_target                 big integer 0
+ca_dev: SYS> alter system set pga_aggregate_target=2489m scope=spfile;
+
+System altered.
+
+ca_dev: SYS> show parameter session_cached_cursors
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+session_cached_cursors               integer     50
+ca_dev: SYS> show parameter open_cursors
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+open_cursors                         integer     300
+ca_dev: SYS> 
+SP2-0042: unknown command "" - rest of line ignored.
+ca_dev: SYS> alter system set open_cursors=3400 scope=SPFILE;
+
+System altered.
+
+ca_dev: SYS> show parameter processes
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+aq_tm_processes                      integer     1
+db_writer_processes                  integer     1
+gcs_server_processes                 integer     0
+global_txn_processes                 integer     1
+job_queue_processes                  integer     1000
+log_archive_max_processes            integer     4
+processes                            integer     1000
+ca_dev: SYS> alter system set processes=3400 scope=spfile;
+
+System altered.
+
+ca_dev: SYS> c/34/30
+  1* alter system set processes=3000 scope=spfile
+ca_dev: SYS> /
+
+System altered.
+
+ca_dev: SYS> show parameter cursor_sharing memory_target
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------------------------------------------------------------------
+cursor_sharing                       string      EXACT
+ca_dev: SYS> [A[B
+SP2-0042: unknown command "[A[B" - rest of line ignored.
+ca_dev: SYS> l
+  1* alter system set processes=3000 scope=spfile
+ca_dev: SYS> l
+  1* alter system set processes=3000 scope=spfile
+ca_dev: SYS> show parameter cursor_sharing, memory_target
+ca_dev: SYS> shutdown immediate;
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+ca_dev: SYS> show parameter streams
+ORA-01034: ORACLE not available
+Process ID: 2335
+Session ID: 194 Serial number: 17
+
+
+ca_dev: SYS> startup
+ORACLE instance started.
+
+Total System Global Area 1.2827E+10 bytes
+Fixed Size                  2265224 bytes
+Variable Size            8187285368 bytes
+Database Buffers         4630511616 bytes
+Redo Buffers                7307264 bytes
+Database mounted.
+Database opened.
+ca_dev: SYS> show parameter streams_pool
+
+NAME                                 TYPE                             VALUE
+------------------------------------ -------------------------------- ------------------------------------------------------------------------------------------
+streams_pool_size                    big integer                      0
+ca_dev: SYS> exit

@@ -1,0 +1,96 @@
+dw_st: SYSTEM> 
+dw_st: SYSTEM> Rem ******** List schemas and objects ********
+dw_st: SYSTEM> PROMPT
+
+dw_st: SYSTEM> PROMPT All user named objects owned by schema accounts
+All user named objects owned by schema accounts
+dw_st: SYSTEM> 
+dw_st: SYSTEM>  SELECT   owner, object_type, object_name, status
+  2   FROM     dba_objects
+  3   WHERE    owner in ('HR','OE','SH','PM','IX','BI')
+  4   AND      object_name NOT LIKE 'SYS%'
+  5   ORDER BY 1,2,3,4;
+
+no rows selected
+
+dw_st: SYSTEM> 
+dw_st: SYSTEM> 
+dw_st: SYSTEM> PROMPT
+
+dw_st: SYSTEM> PROMPT All SYS named objects owned by schema accounts
+All SYS named objects owned by schema accounts
+dw_st: SYSTEM> 
+dw_st: SYSTEM>  SELECT    owner, object_type, object_name, status
+  2   FROM     dba_objects
+  3   WHERE    owner in ('HR','OE','SH','PM','IX','BI')
+  4   AND      object_name LIKE 'SYS%'
+  5   ORDER BY 2,1,3;
+
+no rows selected
+
+dw_st: SYSTEM> 
+dw_st: SYSTEM> Rem ******** Drop Sample Schemas, cascade to objects ********
+dw_st: SYSTEM> PROMPT
+
+dw_st: SYSTEM> PROMPT Dropping Sample Schemas
+Dropping Sample Schemas
+dw_st: SYSTEM> 
+dw_st: SYSTEM> DROP USER hr CASCADE;
+DROP USER hr CASCADE
+          *
+ERROR at line 1:
+ORA-01918: user 'HR' does not exist
+
+
+dw_st: SYSTEM> DROP USER oe CASCADE;
+DROP USER oe CASCADE
+          *
+ERROR at line 1:
+ORA-01918: user 'OE' does not exist
+
+
+dw_st: SYSTEM> DROP USER pm CASCADE;
+DROP USER pm CASCADE
+          *
+ERROR at line 1:
+ORA-01918: user 'PM' does not exist
+
+
+dw_st: SYSTEM> DROP USER ix CASCADE;
+DROP USER ix CASCADE
+          *
+ERROR at line 1:
+ORA-01918: user 'IX' does not exist
+
+
+dw_st: SYSTEM> DROP USER sh CASCADE;
+DROP USER sh CASCADE
+          *
+ERROR at line 1:
+ORA-01918: user 'SH' does not exist
+
+
+dw_st: SYSTEM> DROP USER bi CASCADE;
+DROP USER bi CASCADE
+          *
+ERROR at line 1:
+ORA-01918: user 'BI' does not exist
+
+
+dw_st: SYSTEM> 
+dw_st: SYSTEM> 
+dw_st: SYSTEM> Rem ******** Verify that all Sample Schemas and objects have been dropped ********
+dw_st: SYSTEM> PROMPT
+
+dw_st: SYSTEM> PROMPT Verifying drop of Sample Schemas
+Verifying drop of Sample Schemas
+dw_st: SYSTEM> 
+dw_st: SYSTEM> SELECT   owner, object_type, object_name
+  2   FROM     dba_objects
+  3   WHERE    owner in ('HR','OE','SH','PM','IX','BI')
+  4   ORDER BY 1,2,3;
+
+no rows selected
+
+dw_st: SYSTEM> 
+dw_st: SYSTEM> SPOOL OFF

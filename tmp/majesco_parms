@@ -1,0 +1,32 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+show parameter compatible
+show parameter CURSOR_SHARING  
+show parameter MEMORY_TARGET
+show parameter SGA_MAX_SIZE
+show parameter MEMORY_MAX_TARGET
+show parameter PGA
+show parameter SGA_TARGET
+show parameter SHARED_POOL_SIZE 
+show parameter SESSION_CACHED_CURSORS
+show parameter OPEN_CURSORS
+show parameter PROCESSES 
+show parameter STREAMS_POOL_SIZE
+" | sqlplus -s $SYSCONN@$DB | grep '[a-z]' | sort

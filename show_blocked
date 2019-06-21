@@ -27,12 +27,26 @@ set feedback off
 col osuser format a20
 col username format a12
 col action format a30
+<<<<<<< HEAD
 col terminal format a20
 
 col ord noprint
 
 select nvl(s.blocking_session,s.sid) ord, 'BLOCKED' styp, s.inst_id, s.sid, s.serial#, s.blocking_session, s.blocking_instance, s.seconds_in_wait
 	, s.process, s.osuser, s.username, s.terminal
+=======
+col process format a10
+col bsid format 9999999999
+col terminal format a20
+col wait_sec format 9999999999
+col blocking_instance format 9999 heading BINST_ID
+
+col ord noprint
+
+select nvl(s.blocking_session,s.sid) ord, 'BLOCKED' styp, s.inst_id, s.sid, s.serial#, s.blocking_session bsid, s.blocking_instance, s.seconds_in_wait wait_sec
+	, s.process, s.osuser, s.username, s.terminal
+	, s.program
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 	, s.action
   from gv\$session s, gv\$instance i, gv\$session bs
  where s.blocking_session = bs.sid
@@ -40,8 +54,14 @@ select nvl(s.blocking_session,s.sid) ord, 'BLOCKED' styp, s.inst_id, s.sid, s.se
    and s.inst_id = i.inst_id
    and s.seconds_in_wait > $THRESHOLD
 union 
+<<<<<<< HEAD
 select distinct nvl(bs.blocking_session, bs.sid) ord, 'Blocking' styp, bs.inst_id, bs.sid, bs.serial#, bs.blocking_session, bs.blocking_instance, bs.seconds_in_wait
 	, bs.process, bs.osuser, bs.username, bs.terminal
+=======
+select distinct nvl(bs.blocking_session, bs.sid) ord, 'Blocking' styp, bs.inst_id, bs.sid, bs.serial#, bs.blocking_session bsid, bs.blocking_instance, bs.seconds_in_wait
+	, bs.process, bs.osuser, bs.username, bs.terminal
+	, bs.program
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 	, bs.action
   from gv\$session s, gv\$instance i, gv\$session bs
  where s.blocking_session = bs.sid

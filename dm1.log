@@ -1,0 +1,253 @@
+
+CURTIME
+--------
+12:23:44
+
+Elapsed: 00:00:00.00
+SHOW SEGMENTS
+
+SEGMENT_NAME                                                                      MAX_EXT_LOC   SEG_MB
+--------------------------------------------------------------------------------- ----------- --------
+DRAGON_COMPANY                                                                           2792      256
+DRAGON_MASTER_ACCOUNT                                                                    2071        1
+DRAGON_POLICY                                                                            3044      204
+DRAGON_SESSION                                                                           3132      287
+DRAGON_SUBMISSION                                                                        3580      576
+DRAGON_TASK                                                                              4540     1664
+
+6 rows selected.
+
+Elapsed: 00:00:00.49
+SHOW INVALID INDEXES
+
+no rows selected
+
+Elapsed: 00:00:00.00
+os_st: SYS> 
+os_st: SYS> alter table dw_st.DRAGON_POLICY move;
+
+Table altered.
+
+Elapsed: 00:00:14.33
+os_st: SYS> alter index dw_st.DRAGON_POLICY_AK1 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:05.14
+os_st: SYS> alter index dw_st.DRAGON_POLICY_AK2 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:05.05
+os_st: SYS> alter index dw_st.DRAGON_POLICY_AK3 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:05.13
+os_st: SYS> alter index dw_st.DRAGON_POLICY_I1 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:05.29
+os_st: SYS> alter index dw_st.DRAGON_POLICY_I4 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:04.83
+os_st: SYS> alter index dw_st.DRAGON_POLICY_PK rebuild;
+
+Index altered.
+
+Elapsed: 00:00:05.63
+os_st: SYS> alter index dw_st.TRX_POLICY_STA_LOB rebuild;
+
+Index altered.
+
+Elapsed: 00:00:05.47
+os_st: SYS> alter index dw_st.TRX_POLICY_STA_LOB_2 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:01.23
+os_st: SYS> alter table dw_st.DRAGON_QUOTE move;
+
+Table altered.
+
+Elapsed: 00:00:04.39
+os_st: SYS> alter index dw_st.DRAGON_QUOTE_PK rebuild;
+
+Index altered.
+
+Elapsed: 00:00:01.94
+os_st: SYS> alter table dw_st.DRAGON_SESSION move;
+
+Table altered.
+
+Elapsed: 00:00:23.15
+os_st: SYS> alter index dw_st.DRAGON_SESSION_AK rebuild;
+
+Index altered.
+
+Elapsed: 00:00:13.91
+os_st: SYS> alter index dw_st.DRAGON_SESSION_PK rebuild;
+
+Index altered.
+
+Elapsed: 00:00:10.22
+os_st: SYS> alter table dw_st.DRAGON_SUBMISSION move;
+
+Table altered.
+
+Elapsed: 00:00:56.23
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_CIDX rebuild;
+
+Index altered.
+
+Elapsed: 00:00:16.47
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I1 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:04.85
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I10 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:18.76
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I11 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:15.89
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I13 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:04.33
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I2 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:03.57
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I3 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:15.35
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I4 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:17.57
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I5 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:18.86
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I6 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:05.23
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I7 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:03.71
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I8 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:14.23
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_I9 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:19.38
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_PK rebuild;
+
+Index altered.
+
+Elapsed: 00:00:04.35
+os_st: SYS> alter index dw_st.DRAGON_SUBMISSION_SUBMISSION_1 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:22.70
+os_st: SYS> alter table dw_st.DRAGON_TASK move;
+
+Table altered.
+
+Elapsed: 00:02:22.26
+os_st: SYS> alter index dw_st.DRAGON_TASK_I1 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:28.27
+os_st: SYS> alter index dw_st.DRAGON_TASK_PK rebuild;
+
+Index altered.
+
+Elapsed: 00:00:28.01
+os_st: SYS> alter table dw_st.DRAGON_USER move;
+
+Table altered.
+
+Elapsed: 00:00:03.34
+os_st: SYS> alter index dw_st.DRAGON_USER_GROUP_AK rebuild;
+
+Index altered.
+
+Elapsed: 00:00:00.91
+os_st: SYS> alter index dw_st.DRAGON_USER_I1 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:00.58
+os_st: SYS> alter index dw_st.DRAGON_USER_I2 rebuild;
+
+Index altered.
+
+Elapsed: 00:00:00.71
+os_st: SYS> alter index dw_st.DRAGON_USER_NAME_AK rebuild;
+
+Index altered.
+
+Elapsed: 00:00:00.47
+os_st: SYS> alter index dw_st.DRAGON_USER_PK rebuild;
+
+Index altered.
+
+Elapsed: 00:00:00.85
+os_st: SYS> alter index dw_st.IDX_USER_ID rebuild;
+
+Index altered.
+
+Elapsed: 00:00:00.68
+os_st: SYS> 
+os_st: SYS> set echo off
+SHOW INVALID INDEXES
+
+no rows selected
+
+Elapsed: 00:00:00.01
+SHOW BIG SEGMENTS
+
+SEGMENT_NAME                                                                      MAX_EXT_LOC   SEG_MB
+--------------------------------------------------------------------------------- ----------- --------
+DRAGON_COMPANY                                                                           2792      256
+DRAGON_MASTER_ACCOUNT                                                                    2071        1
+DRAGON_SESSION                                                                           1067      287
+DRAGON_SUBMISSION                                                                        2984      576
+DRAGON_TASK                                                                              5022     1676
+
+Elapsed: 00:00:00.31
+
+CURTIME
+--------
+12:32:58
+
+Elapsed: 00:00:00.00
+os_st: SYS> 
+os_st: SYS> 
+os_st: SYS> 

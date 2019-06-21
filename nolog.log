@@ -1,0 +1,511 @@
+dw_st: SYS> @nolog
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+
+Index altered.
+
+alter index WH_ST.SYS_IL0000246112C00050$$ nologging
+*
+ERROR at line 1:
+ORA-22864: cannot ALTER or DROP LOB indexes
+
+

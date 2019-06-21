@@ -1,0 +1,99 @@
+#################################################################
+
+if [ $# -lt 2 ]; then
+   echo "Missing parameter(s)"
+   echo "syntax:  $0 <materialized view> <env>"
+   echo "example: $0 mvd_policy uat"
+   echo "example: $0 mvi_claimant_type st -COMPLETE"
+   exit 2
+fi
+
+MatView=$1 
+Env=`echo $2 | awk '{ print(tolower($1)) }'`
+shift; shift
+
+Method=""
+CONNSTR="${DWMVCONN}@dw_$Env"
+NINE11=N
+
+#################################################################
+echo '############################################################'
+echo '############################################################'
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -EMERGENCY) NINE11=Y; echo "EMERGENCY REFRESH OF $MatView";;
+      -COMPLETE) Method='C'; echo -e "\n*************COMPLETE REFRESH OF $MatView";;
+              *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+case $Env in
+   dev|qa|uat|st) ;;
+           prd) if [ $NINE11 != 'Y' ]; then
+                 echo -e "\n\n ERROR:  You are not authorized to refresh materialized views this way." 
+		 exit 1
+		fi ;;
+	    *) echo "Environment $Env does not currently exist."
+		exit 2;;
+esac 
+
+#################################################################
+
+#################################################################
+echo "
+whenever sqlerror exit sql.sqlcode
+
+set feedback off 
+col host_name format a20
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+select sysdate from dual;
+select instance_name, host_name from v\$instance;
+
+set feedback 10
+
+prompt 
+prompt 
+prompt 
+prompt
+prompt 
+prompt ==========================================
+prompt Refreshing $MatView ...
+prompt -----
+prompt last refresh info:
+
+select last_refresh_type, last_refresh_date
+  from dba_mviews
+ where owner = 'WH_ST'
+   and mview_name = upper('$MatView');
+
+set timing on 
+
+exec dbms_mview.refresh('WH_ST.$MatView','$Method');
+
+set timing off
+
+prompt --==-=-=--=-=-=====-=-=-=-=-=-==-=-=-=-===-===-==--=---=-=-=---=-=-=-=-=--===----=--=--=-=-==---=-=-=----=--=-=====--
+
+select mview_name, last_refresh_type, last_refresh_date
+  from dba_mviews
+ where owner = 'WH_ST'
+   and mview_name = upper('$MatView');
+
+" | $ORACLE_HOME/bin/sqlplus -s ${CONNSTR}
+
+retcode=$?
+
+case $retcode in 
+  232) echo "You might want to rebuild this materialized view.  The source table may have been modified." ;;
+    7) echo "This error may indicated you that the DWDI user does not have access to the source table."   ;;
+esac
+
+exit $retcode
+

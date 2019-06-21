@@ -1,0 +1,717 @@
+ORACLE_SID is set to os_st
+ORACLE_DB is set to OS_PRD
+ORACLE_HOME is set to /u01/app/oracle/product/11.2.0.4/dbhome_1
+------------------------- spStartupInstanceForRestore
+if database is up, shut it down.
+ORA-01109: database not open
+
+
+Database dismounted.
+ORACLE instance shut down.
+ORACLE instance started.
+
+Total System Global Area 3.8482E+10 bytes
+Fixed Size		    2261368 bytes
+Variable Size		 2.2146E+10 bytes
+Database Buffers	 1.6240E+10 bytes
+Redo Buffers		   93593600 bytes
+------------------------- spStartupInstanceForRestore 0
+------------------------- spRMANDatabaseRestore_frombkp
+
+Recovery Manager: Release 11.2.0.4.0 - Production on Mon Sep 14 09:18:47 2015
+
+Copyright (c) 1982, 2011, Oracle and/or its affiliates.  All rights reserved.
+
+RMAN> 
+RMAN> 
+RMAN> 
+connected to target database: OS_PRD (DBID=3740355744)
+
+RMAN> 
+connected to auxiliary database: OS_ST (not mounted)
+
+RMAN> 2> 3> 4> 5> 6> 7> 8> 9> 
+using target database control file instead of recovery catalog
+allocated channel: aux1
+channel aux1: SID=110 device type=DISK
+
+allocated channel: aux2
+channel aux2: SID=215 device type=DISK
+
+allocated channel: aux3
+channel aux3: SID=325 device type=DISK
+
+allocated channel: c1
+channel c1: SID=658 instance=os_prd2 device type=DISK
+
+allocated channel: c2
+channel c2: SID=345 instance=os_prd2 device type=DISK
+
+allocated channel: c3
+channel c3: SID=654 instance=os_prd2 device type=DISK
+
+Starting Duplicate Db at 14-SEP-15
+
+contents of Memory Script:
+{
+   sql clone "create spfile from memory";
+}
+executing Memory Script
+
+sql statement: create spfile from memory
+
+contents of Memory Script:
+{
+   shutdown clone immediate;
+   startup clone nomount;
+}
+executing Memory Script
+
+Oracle instance shut down
+
+connected to auxiliary database (not started)
+Oracle instance started
+
+Total System Global Area   38482128896 bytes
+
+Fixed Size                     2261368 bytes
+Variable Size              22280146568 bytes
+Database Buffers           16106127360 bytes
+Redo Buffers                  93593600 bytes
+allocated channel: aux1
+channel aux1: SID=110 device type=DISK
+allocated channel: aux2
+channel aux2: SID=215 device type=DISK
+allocated channel: aux3
+channel aux3: SID=325 device type=DISK
+
+contents of Memory Script:
+{
+   set until scn  87570182911;
+   sql clone "alter system set  db_name = 
+ ''OS_PRD'' comment=
+ ''Modified by RMAN duplicate'' scope=spfile";
+   sql clone "alter system set  db_unique_name = 
+ ''OS_ST'' comment=
+ ''Modified by RMAN duplicate'' scope=spfile";
+   shutdown clone immediate;
+   startup clone force nomount
+   restore clone primary controlfile;
+   alter clone database mount;
+}
+executing Memory Script
+
+executing command: SET until clause
+
+sql statement: alter system set  db_name =  ''OS_PRD'' comment= ''Modified by RMAN duplicate'' scope=spfile
+
+sql statement: alter system set  db_unique_name =  ''OS_ST'' comment= ''Modified by RMAN duplicate'' scope=spfile
+
+Oracle instance shut down
+
+Oracle instance started
+
+Total System Global Area   38482128896 bytes
+
+Fixed Size                     2261368 bytes
+Variable Size              22280146568 bytes
+Database Buffers           16106127360 bytes
+Redo Buffers                  93593600 bytes
+allocated channel: aux1
+channel aux1: SID=110 device type=DISK
+allocated channel: aux2
+channel aux2: SID=215 device type=DISK
+allocated channel: aux3
+channel aux3: SID=325 device type=DISK
+
+Starting restore at 14-SEP-15
+
+channel aux1: starting datafile backup set restore
+channel aux1: restoring control file
+channel aux1: reading from backup piece /mnt/oda_backups2/OS_PRD/rman/c-3740355744-20150914-00
+channel aux1: ORA-19870: error while restoring backup piece /mnt/oda_backups2/OS_PRD/rman/c-3740355744-20150914-00
+ORA-19505: failed to identify file "/mnt/oda_backups2/OS_PRD/rman/c-3740355744-20150914-00"
+ORA-27037: unable to obtain file status
+Linux-x86_64 Error: 2: No such file or directory
+Additional information: 3
+
+failover to previous backup
+
+channel aux1: restoring control file
+ORA-19625: error identifying file /mnt/oda_backups2/OS_PRD/rman/snapcf_os_prd1.f
+ORA-27037: unable to obtain file status
+Linux-x86_64 Error: 2: No such file or directory
+Additional information: 3
+ORA-19600: input file is control file  (/mnt/oda_backups2/OS_PRD/rman/snapcf_os_prd1.f)
+ORA-19601: output file is control file  (/u01/app/oracle/oradata/datastore/os_st/control01.ctl)
+
+failover to previous backup
+
+channel aux1: restoring control file
+channel aux1: copied control file copy
+input file name=/mnt/oda_backups/OS_PRD/rman/snapcf_os_prd1.f
+output file name=/u01/app/oracle/oradata/datastore/os_st/control01.ctl
+Finished restore at 14-SEP-15
+
+database mounted
+
+contents of Memory Script:
+{
+   set until scn  87570182911;
+   set newname for clone datafile  1 to new;
+   set newname for clone datafile  2 to new;
+   set newname for clone datafile  3 to new;
+   set newname for clone datafile  4 to new;
+   set newname for clone datafile  5 to new;
+   set newname for clone datafile  6 to new;
+   set newname for clone datafile  7 to new;
+   set newname for clone datafile  8 to new;
+   set newname for clone datafile  9 to new;
+   set newname for clone datafile  10 to new;
+   set newname for clone datafile  11 to new;
+   set newname for clone datafile  12 to new;
+   set newname for clone datafile  13 to new;
+   set newname for clone datafile  14 to new;
+   set newname for clone datafile  15 to new;
+   set newname for clone datafile  16 to new;
+   set newname for clone datafile  17 to new;
+   set newname for clone datafile  18 to new;
+   set newname for clone datafile  19 to new;
+   set newname for clone datafile  20 to new;
+   set newname for clone datafile  21 to new;
+   set newname for clone datafile  22 to new;
+   set newname for clone datafile  23 to new;
+   set newname for clone datafile  24 to new;
+   set newname for clone datafile  25 to new;
+   set newname for clone datafile  26 to new;
+   set newname for clone datafile  27 to new;
+   set newname for clone datafile  28 to new;
+   set newname for clone datafile  29 to new;
+   set newname for clone datafile  30 to new;
+   set newname for clone datafile  31 to new;
+   set newname for clone datafile  32 to new;
+   set newname for clone datafile  33 to new;
+   set newname for clone datafile  34 to new;
+   set newname for clone datafile  35 to new;
+   set newname for clone datafile  36 to new;
+   set newname for clone datafile  37 to new;
+   set newname for clone datafile  38 to new;
+   set newname for clone datafile  39 to new;
+   set newname for clone datafile  40 to new;
+   set newname for clone datafile  41 to new;
+   set newname for clone datafile  42 to new;
+   set newname for clone datafile  43 to new;
+   set newname for clone datafile  44 to new;
+   set newname for clone datafile  45 to new;
+   set newname for clone datafile  46 to new;
+   set newname for clone datafile  47 to new;
+   set newname for clone datafile  48 to new;
+   set newname for clone datafile  49 to new;
+   set newname for clone datafile  50 to new;
+   set newname for clone datafile  51 to new;
+   set newname for clone datafile  52 to new;
+   set newname for clone datafile  53 to new;
+   set newname for clone datafile  54 to new;
+   set newname for clone datafile  55 to new;
+   set newname for clone datafile  56 to new;
+   set newname for clone datafile  57 to new;
+   set newname for clone datafile  58 to new;
+   set newname for clone datafile  59 to new;
+   set newname for clone datafile  60 to new;
+   set newname for clone datafile  61 to new;
+   set newname for clone datafile  62 to new;
+   set newname for clone datafile  63 to new;
+   set newname for clone datafile  64 to new;
+   set newname for clone datafile  65 to new;
+   set newname for clone datafile  66 to new;
+   set newname for clone datafile  67 to new;
+   set newname for clone datafile  68 to new;
+   set newname for clone datafile  69 to new;
+   set newname for clone datafile  70 to new;
+   set newname for clone datafile  71 to new;
+   restore
+   clone database
+   ;
+}
+executing Memory Script
+
+executing command: SET until clause
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+executing command: SET NEWNAME
+
+Starting restore at 14-SEP-15
+
+channel aux1: starting datafile backup set restore
+channel aux1: specifying datafile(s) to restore from backup set
+channel aux1: restoring datafile 00002 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_undotbs1_%u_.dbf
+channel aux1: restoring datafile 00023 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: restoring datafile 00024 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_repo_%u_.dbf
+channel aux1: restoring datafile 00032 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: restoring datafile 00043 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: restoring datafile 00057 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_itqh2qr0_s27229_p1
+channel aux2: starting datafile backup set restore
+channel aux2: specifying datafile(s) to restore from backup set
+channel aux2: restoring datafile 00001 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_system_%u_.dbf
+channel aux2: restoring datafile 00004 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_undotbs2_%u_.dbf
+channel aux2: restoring datafile 00028 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux2: restoring datafile 00033 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux2: restoring datafile 00045 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux2: restoring datafile 00058 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux2: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_iuqh2qr1_s27230_p1
+channel aux3: starting datafile backup set restore
+channel aux3: specifying datafile(s) to restore from backup set
+channel aux3: restoring datafile 00010 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__%u_.dbf
+channel aux3: restoring datafile 00020 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux3: restoring datafile 00038 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux3: restoring datafile 00049 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux3: restoring datafile 00066 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__%u_.dbf
+channel aux3: restoring datafile 00068 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__%u_.dbf
+channel aux3: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_irqh2qr0_s27227_p1
+channel aux1: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_itqh2qr0_s27229_p1 tag=TAG20150913T190046
+channel aux1: restored backup piece 1
+channel aux1: restore complete, elapsed time: 01:39:17
+channel aux1: starting datafile backup set restore
+channel aux1: specifying datafile(s) to restore from backup set
+channel aux1: restoring datafile 00029 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: restoring datafile 00035 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: restoring datafile 00046 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: restoring datafile 00061 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: restoring datafile 00064 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: restoring datafile 00069 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux1: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_isqh2qr0_s27228_p1
+channel aux2: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_iuqh2qr1_s27230_p1 tag=TAG20150913T190046
+channel aux2: restored backup piece 1
+channel aux2: restore complete, elapsed time: 01:42:22
+channel aux2: starting datafile backup set restore
+channel aux2: specifying datafile(s) to restore from backup set
+channel aux2: restoring datafile 00005 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_users_%u_.dbf
+channel aux2: restoring datafile 00018 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux2: restoring datafile 00021 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux2: restoring datafile 00037 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__%u_.dbf
+channel aux2: restoring datafile 00039 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux2: restoring datafile 00053 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux2: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_iqqh2qqv_s27226_p1
+channel aux3: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_irqh2qr0_s27227_p1 tag=TAG20150913T190046
+channel aux3: restored backup piece 1
+channel aux3: restore complete, elapsed time: 01:48:59
+channel aux3: starting datafile backup set restore
+channel aux3: specifying datafile(s) to restore from backup set
+channel aux3: restoring datafile 00003 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_sysaux_%u_.dbf
+channel aux3: restoring datafile 00019 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux3: restoring datafile 00022 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux3: restoring datafile 00041 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux3: restoring datafile 00050 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__%u_.dbf
+channel aux3: restoring datafile 00055 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_%u_.dbf
+channel aux3: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_ipqh2qqv_s27225_p1
+channel aux1: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_isqh2qr0_s27228_p1 tag=TAG20150913T190046
+channel aux1: restored backup piece 1
+channel aux1: restore complete, elapsed time: 01:43:58
+channel aux1: starting datafile backup set restore
+channel aux1: specifying datafile(s) to restore from backup set
+channel aux1: restoring datafile 00016 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_%u_.dbf
+channel aux1: restoring datafile 00031 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_%u_.dbf
+channel aux1: restoring datafile 00040 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux1: restoring datafile 00052 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_%u_.dbf
+channel aux1: restoring datafile 00060 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_%u_.dbf
+channel aux1: restoring datafile 00062 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__%u_.dbf
+channel aux1: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_ivqh30ta_s27231_p1
+channel aux2: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_iqqh2qqv_s27226_p1 tag=TAG20150913T190046
+channel aux2: restored backup piece 1
+channel aux2: restore complete, elapsed time: 01:52:59
+channel aux2: starting datafile backup set restore
+channel aux2: specifying datafile(s) to restore from backup set
+channel aux2: restoring datafile 00006 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_datamart_%u_.dbf
+channel aux2: restoring datafile 00009 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__%u_.dbf
+channel aux2: restoring datafile 00027 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_%u_.dbf
+channel aux2: restoring datafile 00042 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux2: restoring datafile 00054 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux2: restoring datafile 00070 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_%u_.dbf
+channel aux2: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j2qh31rl_s27234_p1
+channel aux3: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_ipqh2qqv_s27225_p1 tag=TAG20150913T190046
+channel aux3: restored backup piece 1
+channel aux3: restore complete, elapsed time: 01:53:47
+channel aux3: starting datafile backup set restore
+channel aux3: specifying datafile(s) to restore from backup set
+channel aux3: restoring datafile 00007 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_datamart_%u_.dbf
+channel aux3: restoring datafile 00008 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_md_indx_%u_.dbf
+channel aux3: restoring datafile 00013 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux3: restoring datafile 00034 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_%u_.dbf
+channel aux3: restoring datafile 00044 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux3: restoring datafile 00056 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux3: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j3qh32o0_s27235_p1
+channel aux2: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j2qh31rl_s27234_p1 tag=TAG20150913T190046
+channel aux2: restored backup piece 1
+channel aux2: restore complete, elapsed time: 02:19:32
+channel aux2: starting datafile backup set restore
+channel aux2: specifying datafile(s) to restore from backup set
+channel aux2: restoring datafile 00015 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_%u_.dbf
+channel aux2: restoring datafile 00025 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux2: restoring datafile 00026 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux2: restoring datafile 00051 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__%u_.dbf
+channel aux2: restoring datafile 00065 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux2: restoring datafile 00071 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux2: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j0qh316t_s27232_p1
+channel aux1: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_ivqh30ta_s27231_p1 tag=TAG20150913T190046
+channel aux1: restored backup piece 1
+channel aux1: restore complete, elapsed time: 02:33:14
+channel aux1: starting datafile backup set restore
+channel aux1: specifying datafile(s) to restore from backup set
+channel aux1: restoring datafile 00014 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_%u_.dbf
+channel aux1: restoring datafile 00030 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux1: restoring datafile 00048 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux1: restoring datafile 00063 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux1: restoring datafile 00067 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux1: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j1qh31m4_s27233_p1
+channel aux3: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j3qh32o0_s27235_p1 tag=TAG20150913T190046
+channel aux3: restored backup piece 1
+channel aux3: restore complete, elapsed time: 02:48:09
+channel aux3: starting datafile backup set restore
+channel aux3: specifying datafile(s) to restore from backup set
+channel aux3: restoring datafile 00011 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux3: restoring datafile 00012 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux3: restoring datafile 00017 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_meta_dat_%u_.dbf
+channel aux3: restoring datafile 00036 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux3: restoring datafile 00047 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux3: restoring datafile 00059 to /u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_%u_.dbf
+channel aux3: reading from backup piece /mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j4qh32po_s27236_p1
+channel aux2: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j0qh316t_s27232_p1 tag=TAG20150913T190046
+channel aux2: restored backup piece 1
+channel aux2: restore complete, elapsed time: 03:06:29
+channel aux1: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j1qh31m4_s27233_p1 tag=TAG20150913T190046
+channel aux1: restored backup piece 1
+channel aux1: restore complete, elapsed time: 03:15:43
+channel aux3: piece handle=/mnt/oda_backups/OS_PRD/rman/OS_PRD_20150913_L0_D_j4qh32po_s27236_p1 tag=TAG20150913T190046
+channel aux3: restored backup piece 1
+channel aux3: restore complete, elapsed time: 03:27:27
+Finished restore at 14-SEP-15
+
+contents of Memory Script:
+{
+   switch clone datafile all;
+}
+executing Memory Script
+
+datafile 1 switched to datafile copy
+input datafile copy RECID=238 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_system_bzfldxbn_.dbf
+datafile 2 switched to datafile copy
+input datafile copy RECID=239 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_undotbs1_bzfldwpt_.dbf
+datafile 3 switched to datafile copy
+input datafile copy RECID=240 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_sysaux_bzfrs8j5_.dbf
+datafile 4 switched to datafile copy
+input datafile copy RECID=241 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_undotbs2_bzfldx42_.dbf
+datafile 5 switched to datafile copy
+input datafile copy RECID=242 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_users_bzfrdxhy_.dbf
+datafile 6 switched to datafile copy
+input datafile copy RECID=243 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_datamart_bzfz0p3d_.dbf
+datafile 7 switched to datafile copy
+input datafile copy RECID=244 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_datamart_bzfzgmqj_.dbf
+datafile 8 switched to datafile copy
+input datafile copy RECID=245 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_md_indx_bzfzgmz6_.dbf
+datafile 9 switched to datafile copy
+input datafile copy RECID=246 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__bzfz0nsh_.dbf
+datafile 10 switched to datafile copy
+input datafile copy RECID=247 STAMP=890421531 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__bzfldwdo_.dbf
+datafile 11 switched to datafile copy
+input datafile copy RECID=248 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg99vkl_.dbf
+datafile 12 switched to datafile copy
+input datafile copy RECID=249 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg99vtq_.dbf
+datafile 13 switched to datafile copy
+input datafile copy RECID=250 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzfzgldr_.dbf
+datafile 14 switched to datafile copy
+input datafile copy RECID=251 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_bzg799k7_.dbf
+datafile 15 switched to datafile copy
+input datafile copy RECID=252 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_bzg76b8k_.dbf
+datafile 16 switched to datafile copy
+input datafile copy RECID=253 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_bzfy9zjs_.dbf
+datafile 17 switched to datafile copy
+input datafile copy RECID=254 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_meta_dat_bzg99wvy_.dbf
+datafile 18 switched to datafile copy
+input datafile copy RECID=255 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfrdw06_.dbf
+datafile 19 switched to datafile copy
+input datafile copy RECID=256 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfrs6xj_.dbf
+datafile 20 switched to datafile copy
+input datafile copy RECID=257 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldwo5_.dbf
+datafile 21 switched to datafile copy
+input datafile copy RECID=258 STAMP=890421532 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfrdwbw_.dbf
+datafile 22 switched to datafile copy
+input datafile copy RECID=259 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfrs78z_.dbf
+datafile 23 switched to datafile copy
+input datafile copy RECID=260 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldvp3_.dbf
+datafile 24 switched to datafile copy
+input datafile copy RECID=261 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_repo_bzfldwwo_.dbf
+datafile 25 switched to datafile copy
+input datafile copy RECID=262 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg769jq_.dbf
+datafile 26 switched to datafile copy
+input datafile copy RECID=263 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg769yl_.dbf
+datafile 27 switched to datafile copy
+input datafile copy RECID=264 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_bzfz0o3j_.dbf
+datafile 28 switched to datafile copy
+input datafile copy RECID=265 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldw3n_.dbf
+datafile 29 switched to datafile copy
+input datafile copy RECID=266 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfr70y8_.dbf
+datafile 30 switched to datafile copy
+input datafile copy RECID=267 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg798x3_.dbf
+datafile 31 switched to datafile copy
+input datafile copy RECID=268 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_bzfy9z8g_.dbf
+datafile 32 switched to datafile copy
+input datafile copy RECID=269 STAMP=890421533 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldvxw_.dbf
+datafile 33 switched to datafile copy
+input datafile copy RECID=270 STAMP=890421534 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldwcr_.dbf
+datafile 34 switched to datafile copy
+input datafile copy RECID=271 STAMP=890421534 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_bzfzglrs_.dbf
+datafile 35 switched to datafile copy
+input datafile copy RECID=272 STAMP=890421534 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfr717m_.dbf
+datafile 36 switched to datafile copy
+input datafile copy RECID=273 STAMP=890421534 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg99v6j_.dbf
+datafile 37 switched to datafile copy
+input datafile copy RECID=274 STAMP=890421534 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__bzfrdx66_.dbf
+datafile 38 switched to datafile copy
+input datafile copy RECID=275 STAMP=890421534 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldwwq_.dbf
+datafile 39 switched to datafile copy
+input datafile copy RECID=276 STAMP=890421534 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfrdwm9_.dbf
+datafile 40 switched to datafile copy
+input datafile copy RECID=277 STAMP=890421534 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzfy9zpw_.dbf
+datafile 41 switched to datafile copy
+input datafile copy RECID=278 STAMP=890421534 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfrs7l9_.dbf
+datafile 42 switched to datafile copy
+input datafile copy RECID=279 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzfz0odh_.dbf
+datafile 43 switched to datafile copy
+input datafile copy RECID=280 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldw3w_.dbf
+datafile 44 switched to datafile copy
+input datafile copy RECID=281 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzfzgm3h_.dbf
+datafile 45 switched to datafile copy
+input datafile copy RECID=282 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldwmg_.dbf
+datafile 46 switched to datafile copy
+input datafile copy RECID=283 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfr71gw_.dbf
+datafile 47 switched to datafile copy
+input datafile copy RECID=284 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg99w74_.dbf
+datafile 48 switched to datafile copy
+input datafile copy RECID=285 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg799px_.dbf
+datafile 49 switched to datafile copy
+input datafile copy RECID=286 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldx46_.dbf
+datafile 50 switched to datafile copy
+input datafile copy RECID=287 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__bzfrs87j_.dbf
+datafile 51 switched to datafile copy
+input datafile copy RECID=288 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__bzg76bk9_.dbf
+datafile 52 switched to datafile copy
+input datafile copy RECID=289 STAMP=890421535 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_bzfy9zy3_.dbf
+datafile 53 switched to datafile copy
+input datafile copy RECID=290 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfrdww1_.dbf
+datafile 54 switched to datafile copy
+input datafile copy RECID=291 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzfz0osk_.dbf
+datafile 55 switched to datafile copy
+input datafile copy RECID=292 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfrs7xf_.dbf
+datafile 56 switched to datafile copy
+input datafile copy RECID=293 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzfzgmdw_.dbf
+datafile 57 switched to datafile copy
+input datafile copy RECID=294 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldwd9_.dbf
+datafile 58 switched to datafile copy
+input datafile copy RECID=295 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfldwth_.dbf
+datafile 59 switched to datafile copy
+input datafile copy RECID=296 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg99wks_.dbf
+datafile 60 switched to datafile copy
+input datafile copy RECID=297 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_bzfyb06l_.dbf
+datafile 61 switched to datafile copy
+input datafile copy RECID=298 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfr71ps_.dbf
+datafile 62 switched to datafile copy
+input datafile copy RECID=299 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__bzfyb0jh_.dbf
+datafile 63 switched to datafile copy
+input datafile copy RECID=300 STAMP=890421536 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg799wp_.dbf
+datafile 64 switched to datafile copy
+input datafile copy RECID=301 STAMP=890421537 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfr71ys_.dbf
+datafile 65 switched to datafile copy
+input datafile copy RECID=302 STAMP=890421537 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg76bt8_.dbf
+datafile 66 switched to datafile copy
+input datafile copy RECID=303 STAMP=890421537 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__bzfldxcf_.dbf
+datafile 67 switched to datafile copy
+input datafile copy RECID=304 STAMP=890421537 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg79989_.dbf
+datafile 68 switched to datafile copy
+input datafile copy RECID=305 STAMP=890421537 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_storage__bzfldxlx_.dbf
+datafile 69 switched to datafile copy
+input datafile copy RECID=306 STAMP=890421537 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_d_bzfr726n_.dbf
+datafile 70 switched to datafile copy
+input datafile copy RECID=307 STAMP=890421537 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_object_i_bzfz0pcl_.dbf
+datafile 71 switched to datafile copy
+input datafile copy RECID=308 STAMP=890421537 file name=/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_lob_data_bzg76c4t_.dbf
+
+contents of Memory Script:
+{
+   set until time  "to_date('SEP 14 2015 03:19:01', 'MON DD YYYY HH24:MI:SS')";
+   recover
+   clone database
+    delete archivelog
+   ;
+}
+executing Memory Script
+
+executing command: SET until clause
+
+Starting recover at 14-SEP-15
+
+starting media recovery
+
+released channel: c1
+released channel: c2
+released channel: c3
+Oracle Error: 
+ORA-01547: warning: RECOVER succeeded but OPEN RESETLOGS would get error below
+ORA-01152: file 1 was not restored from a sufficiently old backup 
+ORA-01110: data file 1: '/u02/app/oracle/oradata/datastore/.ACFS/snaps/os_st/OS_ST/datafile/o1_mf_system_bzfldxbn_.dbf'
+
+released channel: aux1
+released channel: aux2
+released channel: aux3
+RMAN-00571: ===========================================================
+RMAN-00569: =============== ERROR MESSAGE STACK FOLLOWS ===============
+RMAN-00571: ===========================================================
+RMAN-03002: failure of Duplicate Db command at 09/14/2015 19:19:29
+RMAN-05501: aborting duplication of target database
+RMAN-03015: error occurred in stored script Memory Script
+RMAN-06053: unable to perform media recovery because of missing log
+RMAN-06025: no backup of archived log for thread 2 with sequence 8919 and starting SCN of 87570180145 found to restore
+RMAN-06025: no backup of archived log for thread 1 with sequence 7336 and starting SCN of 87570180133 found to restore
+
+RMAN> 
+
+Recovery Manager complete.

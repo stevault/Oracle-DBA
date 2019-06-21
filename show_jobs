@@ -1,0 +1,89 @@
+DB=$ORACLE_SID
+OWNCLAUSE="1=1"
+
+if [ $# -lt 0 ]; then
+   echo "ERROR:  missing parameter"
+   echo "SYNTAX:  $0 <tablespace> [ -d <database> ] [ -o <owner> | all ]"
+   exit 2
+fi
+
+while [ $# -ge 1 ]; do
+
+   opt=$1
+ 
+   case $opt in 
+	-d) shift; DB=$1; shift;;
+	-o) shift; OWNCLAUSE="owner = upper('$1')"; shift;;
+	 *) echo "I don't know what $opt is..."; exit 2;;
+   esac
+
+done
+
+echo "
+
+set feedback off serveroutput on pages 200
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS'; 
+
+col owner format a15
+col schedule_owner format a15
+col start_date format a45
+col next_run_date format a45
+
+compute sum of mb on report
+break on report
+
+ select owner, job_name, job_type
+	--, job_action
+	, start_Date, enabled, run_count, failure_count, next_RuN_date
+   from dba_scheduler_jobs
+  where $OWNCLAUSE;
+
+
+" | sqlplus -s $SYSCONN@$DB
+
+exit
+
+
+ OWNER                                                                                                                   VARCHAR2(30)
+ JOB_NAME                                                                                                                VARCHAR2(30)
+ JOB_SUBNAME                                                                                                             VARCHAR2(30)
+ JOB_STYLE                                                                                                               VARCHAR2(11)
+ JOB_CREATOR                                                                                                             VARCHAR2(30)
+ CLIENT_ID                                                                                                               VARCHAR2(64)
+ GLOBAL_UID                                                                                                              VARCHAR2(32)
+ PROGRAM_OWNER                                                                                                           VARCHAR2(4000)
+ PROGRAM_NAME                                                                                                            VARCHAR2(4000)
+ JOB_TYPE                                                                                                                VARCHAR2(16)
+ JOB_ACTION                                                                                                              VARCHAR2(4000)
+ NUMBER_OF_ARGUMENTS                                                                                                     NUMBER
+ SCHEDULE_OWNER                                                                                                          VARCHAR2(4000)
+ SCHEDULE_NAME                                                                                                           VARCHAR2(4000)
+ SCHEDULE_TYPE                                                                                                           VARCHAR2(12)
+ START_DATE                                                                                                              TIMESTAMP(6) WITH TIME ZONE
+ REPEAT_INTERVAL                                                                                                         VARCHAR2(4000)
+ EVENT_QUEUE_OWNER                                                                                                       VARCHAR2(30)
+ EVENT_QUEUE_NAME                                                                                                        VARCHAR2(30)
+ EVENT_QUEUE_AGENT                                                                                                       VARCHAR2(256)
+ EVENT_CONDITION                                                                                                         VARCHAR2(4000)
+ EVENT_RULE                                                                                                              VARCHAR2(65)
+ FILE_WATCHER_OWNER                                                                                                      VARCHAR2(260)
+ FILE_WATCHER_NAME                                                                                                       VARCHAR2(260)
+ END_DATE                                                                                                                TIMESTAMP(6) WITH TIME ZONE
+ JOB_CLASS                                                                                                               VARCHAR2(30)
+ ENABLED                                                                                                                 VARCHAR2(5)
+ AUTO_DROP                                                                                                               VARCHAR2(5)
+ RESTARTABLE                                                                                                             VARCHAR2(5)
+ STATE                                                                                                                   VARCHAR2(15)
+ JOB_PRIORITY                                                                                                            NUMBER
+ RUN_COUNT                                                                                                               NUMBER
+ MAX_RUNS                                                                                                                NUMBER
+ FAILURE_COUNT                                                                                                           NUMBER
+ MAX_FAILURES                                                                                                            NUMBER
+ RETRY_COUNT                                                                                                             NUMBER
+ LAST_START_DATE                                                                                                         TIMESTAMP(6) WITH TIME ZONE
+ LAST_RUN_DURATION                                                                                                       INTERVAL DAY(9) TO SECOND(6)
+ NEXT_RUN_DATE                                                                                                           TIMESTAMP(6) WITH TIME ZONE
+ SCHEDULE_LIMIT                                                                                                          INTERVAL DAY(3) TO SECOND(0)
+ MAX_RUN_DURATION                                                                                                        INTERVAL DAY(3) TO SECOND(0)
+ LOGGING_LEVEL                                                                                                           VARCHAR2(11)
+

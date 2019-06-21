@@ -1,0 +1,8 @@
+
+find /u01/app/grid/diag/asm/+asm/+ASM2/trace -mtime +30 -name *.tr? | while read f
+do
+  ls -l $f
+  rm -f $f
+done
+
+

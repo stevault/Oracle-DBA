@@ -1,0 +1,47 @@
+
+DB=$ORACLE_SID
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+echo "
+
+set feedback off linesize 250 trimspool on
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+col member format a80
+col dbid format a20
+
+
+PROMPT #################################
+PROMPT ONLINE REDO LOGS
+PROMPT #################################
+
+ select * from v\$log;
+ select * from v\$logfile where type = 'ONLINE';
+
+PROMPT #################################
+PROMPT STANDBY REDO LOGS
+PROMPT #################################
+
+ select * from v\$standby_log;
+ select * from v\$logfile where type = 'STANDBY';
+
+PROMPT #################################
+PROMPT OTHER REDO LOGS
+PROMPT #################################
+
+ select * from v\$logfile where type not in ('ONLINE','STANDBY');
+
+" | sqlplus -s ${SYSCONN}@$DB
+
+

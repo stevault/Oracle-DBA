@@ -1,0 +1,39 @@
+DB=$ORACLE_SID
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+echo "
+
+set lines 200
+col guard_status format a20
+col switchover_status format a20
+col dataguard_broker format a20
+
+select dbid, name, db_unique_name
+	, primary_db_unique_name, log_mode, controlfile_change#, open_mode, protection_mode, protection_level
+	--, switchover#, database_role, switchover_status, dataguard_broker, guard_status, flashback_on
+from v\$database
+/
+
+select dbid, name, db_unique_name
+	--, primary_db_unique_name, log_mode, controlfile_change#, open_mode, protection_mode, protection_level
+	, switchover#, database_role, switchover_status , dataguard_broker, guard_status, flashback_on
+from v\$database
+/
+
+
+" | sqlplus -s $SYSCONN@$DB

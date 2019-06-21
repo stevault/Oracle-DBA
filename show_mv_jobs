@@ -24,8 +24,15 @@ alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 set feedback 20
 
 select j.job, what
+<<<<<<< HEAD
 	, nvl(jr.this_date, j.last_date)  d
 	, decode(jr.this_date,null,null,'X') currently_refresh
+=======
+	, broken
+	, nvl(jr.this_date, j.last_date)  d
+	, decode(jr.this_date,null,null,'X') currently_refresh
+	, j.next_date
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
  from dba_jobs j, dba_jobs_running jr
 where j.job = jr.job (+)
  order by d

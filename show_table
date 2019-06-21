@@ -50,7 +50,10 @@ ttitle center "TABLE INFO"  skip 2
  t.TABLESPACE_NAME,
  t.last_analyzed,
  t.STATUS,
+<<<<<<< HEAD
  t.logging,
+=======
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
  t.NUM_ROWS
 , degree
    from dba_tables t, dba_objects o

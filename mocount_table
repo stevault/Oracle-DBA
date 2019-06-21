@@ -1,0 +1,23 @@
+
+if [ $# -lt 2 ]; then
+  echo "missing parameters"
+  echo "$0 <table> <col>"
+  exit 1
+fi
+
+CONN=$SYSCONN 
+
+echo "table = $1"
+table=$1
+
+echo "monthcol = $2"
+monthcol=$2
+
+
+echo "select to_char($monthcol,'YYYYMM'), count(1)
+  from $table
+  group by to_char($monthcol,'YYYYMM')
+order by to_char($monthcol,'YYYYMM');" | sqlplus -s $CONN
+
+
+

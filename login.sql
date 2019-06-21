@@ -1,9 +1,13 @@
+<<<<<<< HEAD
 set feedback off
 --alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 set feedback on
 
 set lines 312 pages 72 trimspool on 
 
+=======
+set lines 312 pages 72 trimspool on 
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 SET SQLPROMPT '_CONNECT_IDENTIFIER: _USER> '
 col owner format a20
 col grantee format a30

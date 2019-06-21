@@ -1,0 +1,47 @@
+DB=$ORACLE_SID
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+echo "
+
+set lines 200 pages 400 trimspool on 
+compute sum of mb on report
+break on report
+
+alter session set nls_date_format='DD-MON-YYYY HH24:MI:SS';
+
+col mb format 999999.99
+col first_change# format 99999999999999
+col next_change# format 99999999999999
+
+select 
+	stamp, sequence#,
+	FIRST_CHANGE#, FIRST_TIME, NEXT_CHANGE#, NEXT_TIME
+	, (blocks*block_size)/1024/1024 mb
+	--thread#, dest_id, count(1)
+ from v\$archived_log
+where first_time >= to_date('26-MAR-2017 00:02:55','DD-MON-YYYY HH24:MI:SS')
+  and thread# = 1
+  and dest_id = 3
+--group by thread#, dest_id
+--order by thread#, dest_id
+order by recid
+/
+
+" | sqlplus -s $SYSCONN@$DB
+
+

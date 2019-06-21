@@ -2,7 +2,11 @@
 
 DB=$ORACLE_SID
 THRESHOLD=25
+<<<<<<< HEAD
 SQL=/var/tmp/`basename $0 .bat`.sql
+=======
+SQL=/home/oracle/awdba/`basename $0 .bat`.sql
+>>>>>>> 36c77cc814cf7271d265031bd579fd31256a91e1
 
 ######################################################
 

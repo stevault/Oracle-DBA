@@ -1,0 +1,10 @@
+run {
+     allocate auxiliary channel  aux1 device type disk;
+     allocate auxiliary channel  aux2 device type disk;
+     allocate channel c1 device type disk;
+     allocate channel c2 device type disk;
+     duplicate target database
+        to oraddb
+        from active database
+        nofilenamecheck;
+    }
