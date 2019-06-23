@@ -1,0 +1,46 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+DAYS=30
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -days) DAYS=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+set pagesize 900
+col avg_elap format 999999
+col avg_elap_wo_err format 999999
+
+select 
+	trunc(cast(created_timestamp as date)) create_date
+	, to_char(trunc(cast(created_timestamp as date)),'DAY') dayofweek
+	, count(1)
+	, avg(diff_sec) avg_elap
+	, avg(case when status != 'ERROR' then diff_sec else null end) avg_elap_wo_err
+	, sum(case when status = 'ERROR' then 1 else 0 end) errors
+	, sum(case when status = 'COMPLETE' then 1 else 0 end) complete
+from (
+select trx_id, created_timestamp
+	, start_time, end_time
+	, (cast(end_time as date) -  cast(start_time as date)) *(24*60*60) diff_sec
+	, status
+ from dw_st.dw_document_trx
+where cast(start_time as date) > trunc(sysdate) - $DAYS
+)
+group by trunc(cast(created_timestamp as date))
+order by trunc(cast(created_timestamp as date)) desc
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

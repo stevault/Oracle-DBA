@@ -9,20 +9,28 @@ shift
 
 CLAUSE=""
 
-while [ $# -ge 1 ]; do
 
-   opt=$1
-   shift
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
 
-   case $opt  in
-     -d) DB=$1 ; shift ;;
-     -o) CLAUSE="$CLAUSE and owner = UPPER('$1')" ; shift ;;
-      *) echo "I don't know what $opt is."; exit 2;;
-   esac
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+     -o) shift; CLAUSE="$CLAUSE and owner = UPPER('$1')" ; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
 
 done
 
-$ORACLE_HOME/bin/sqlplus -s '/ as sysdba' << EOF
+#OPTSE#####################################################
+
+echo "
 
 col mb format 999999.99
 col segment_name format a40
@@ -43,7 +51,4 @@ set feedback off
     --
    ${CLAUSE};
 
-EOF
-
-
-
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB

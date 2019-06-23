@@ -1,0 +1,49 @@
+#!/bin/ksh
+DB=$ORACLE_SID
+ROWLOCK='enq: TX - row lock contention'
+EVENT=$ROWLOCK
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+
+echo " 
+
+set pagesize 9000
+
+select trim(to_char(begin_interval_time,'DAY')), to_char(begin_interval_time,'HH24:MI') tim, instance_Number, sql_id
+  , case when begin_interval_time >= '13-AUG-2016' then 'AFTER' else 'BEFORE' end bef_aft
+	, cnt, time_waited
+ from (
+select ash.event, s.instance_number
+	, s.begin_interval_time
+	, ash.sql_id
+	, count(1) cnt, sum(time_waited/1024) time_waited
+ from dba_hist_active_sess_history ash, dba_hist_snapshot s
+ where 1=1
+   and s.snap_id = ash.snap_id (+)
+   and s.instance_number = ash.instance_number (+)
+  and begin_interval_time >= '06-AUG-2016'
+  --and begin_interval_time < '13-AUG-2016' and begin_interval_time >= '06-AUG-2016'
+  --and begin_interval_time >= '13-AUG-2016'
+group by ash.event, s.instance_number, s.begin_interval_time, ash.sql_id
+)
+where event = '$EVENT'
+order by begin_interval_time, instance_number, sql_id;
+
+" | sqlplus -s $SYSCONN@$DB
+
+

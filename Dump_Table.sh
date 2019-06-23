@@ -103,7 +103,7 @@ shift; shift
 while [ $# -ge 1 ]
 do
    case $1 in 
-    -d) shift ; DUMPDIR=$1 ;;
+    -d) shift ; DUMPDIR=$1 ; shift ;;
      *) echo "no idea what option '$1' is..." ; exit 2 ;;
    esac
 

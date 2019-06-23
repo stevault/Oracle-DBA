@@ -1,4 +1,7 @@
 
+DB=$ORACLE_SID
+
+
 cr_sess_stat () {
 
 echo "
@@ -19,7 +22,7 @@ select sysdate cur_date_time,
 
 --    AND p.BACKGROUND is null /* Remove if need to monitor background processes */
 
-" | sqlplus -s awdba/awdba
+" | sqlplus -s $SYSCONN@$DB
 
 } 
 
@@ -42,7 +45,7 @@ select sysdate,
 
 --    AND p.BACKGROUND is null /* Remove if need to monitor background processes */
 
-" | sqlplus -s awdba/awdba
+" | sqlplus -s $SYSCONN@$DB
 
 }
 

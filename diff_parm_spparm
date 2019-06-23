@@ -1,0 +1,44 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+col name format a50
+col sp_value format a80
+col p_value format a80
+
+set serveroutput off feedback off
+
+drop table sjt_parameter;
+drop table sjt_spparameter;
+
+set serveroutput on feedback on
+whenever sqlerror exit sql.sqlcode
+create table sjt_parameter as select name, value from v\$parameter;
+
+create table sjt_spparameter as select name, value from v\$spparameter;
+
+
+select sp.name, sp.value sp_value, nvl(p.value,'NOT DYNAMIC') p_value
+from sjt_parameter p, sjt_spparameter sp
+where sp.name = p.name (+)
+order by 1;
+
+
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
