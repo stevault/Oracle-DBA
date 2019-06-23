@@ -1,0 +1,20 @@
+if [ $# -lt 1 ]; then
+  echo "ERROR:  missing parameter BACKUP_DATE"
+  echo "SYNTAX: $0 <Backup Date (YYYYMMDD)>"
+  exit 2
+fi
+
+BACKUP_DATE=$1
+
+let BACKUP_SIZE=0
+
+du -m *${BACKUP_DATE}* | while read size file
+do
+  echo $size $file
+  let BACKUP_SIZE=$BACKUP_SIZE+$size
+done
+
+echo Total size for this backup date:  $BACKUP_SIZE MB
+
+exit 0
+

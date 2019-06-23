@@ -49,7 +49,6 @@ order by object_name, owner, object_type ;
 
 " |  $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
 
-
 exit
 
  OWNER                                                                                                                   VARCHAR2(30)

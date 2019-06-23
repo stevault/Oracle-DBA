@@ -1,0 +1,64 @@
+
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+echo "
+
+break on inst_id skip 1 nodup
+
+ select inst_id, sid, type, id1, id2, lmode, request
+   FROM gv\$lock
+  WHERE type='TX'
+  order by inst_id, id1
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+
+echo -e "Pick an instance and sid => \c"
+read INST_ID SID
+
+echo "
+
+col object_name format a40
+col object_type format a40
+
+ SELECT row_wait_obj#,
+	row_wait_file#,
+	row_wait_block#,
+	row_wait_row#
+   FROM gv\$session
+  WHERE sid = $SID
+    and inst_id = $INST_ID
+/
+
+
+set linesize 300
+
+ select s.inst_id, s.sid, o.owner, o.object_name, o.object_type 
+   from dba_objects o, gv\$session s, gv\$lock l
+  where o.object_id = s.row_wait_obj#
+    and s.inst_id = l.inst_id
+    and s.sid = l.sid
+    and l.type = 'TX'
+    and l.lmode = 6
+   / 
+
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
+

@@ -1,0 +1,9 @@
+sql_id=$1
+
+echo "
+set pagesize 90
+
+select * from table(dbms_xplan.display_awr('$sql_id'));
+
+" | sqlplus -s $SYSCONN
+

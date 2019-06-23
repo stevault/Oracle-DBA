@@ -1,6 +1,7 @@
 
 DB=$ORACLE_SID
 
+
 cr_sess_stat () {
 
 echo "

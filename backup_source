@@ -1,0 +1,44 @@
+
+
+if [ $# -lt 3 ]; then
+   echo "ERROR: Missing parameter(s)."
+   echo "SYNTAX: $0 <object_type> <owner> <object_name>"
+   exit 2
+fi
+
+OBJECT_TYPE=$1
+OWNER=$2
+OBJECT_NAME=$3
+SPOOL_FILE=~/sql/${3}.sql
+
+echo "
+
+whenever sqlerror exit failure
+whenever oserror exit failure
+
+set linesize 25000 pagesize 0 long 1000000 trimspool on longc 225000 verify off showmode off feedback off
+
+spool $SPOOL_FILE
+
+execute DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'SQLTERMINATOR',true);
+execute DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'PRETTY',true);
+
+col x for a25000
+
+select dbms_metadata.get_ddl(upper('$OBJECT_TYPE'),upper('$OBJECT_NAME'),upper('$OWNER')) x from dual;
+
+spool off
+
+exit;
+
+" | sqlplus -s '/ as sysdba'
+
+retcode=$?
+
+if [ $retcode -ne 0 ]; then
+   cat $SPOOL_FILE
+   echo "An ERROR occurred generating file for ${OWNER}.${OBJECT_NAME}"
+else
+   ls -l $SPOOL_FILE
+fi
+

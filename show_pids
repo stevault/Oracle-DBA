@@ -1,0 +1,49 @@
+
+DB=all
+. /home/oracle/awdba/.sh_common
+REFRESH=3
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+        -d) DB=$1; shift ;;
+     -opts) sh_show_opts ; exit 0 ;;
+  -refresh) REFRESH=$1; shift ;;
+         *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+
+case $DB in 
+  all|ALL) DB=$LOCALSIDS ; break ;;
+esac 
+
+while :
+do
+
+clear
+
+w
+
+for db in $DB
+do
+  echo "############################################"
+  ps -ef | sort -nrk4 | grep $db | grep -v ' 1  0 ' | grep -v grep | head -20
+
+done
+
+if [ $REFRESH -gt 0 ]; then 
+  sleep $REFRESH
+else
+  break
+fi
+
+done
+

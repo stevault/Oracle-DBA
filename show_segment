@@ -52,5 +52,3 @@ set feedback off
    ${CLAUSE};
 
 " | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
-
-

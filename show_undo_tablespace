@@ -1,0 +1,121 @@
+#!/bin/ksh
+
+. /cloudsfs1/jenkins/OracleEnv.h
+
+DB=$ORACLE_SID
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameter <tablespace_name>"
+   exit 2
+fi
+
+tablespace=$1
+shift
+
+while [ $# -ge 1 ]; do
+
+   opt=$1
+ 
+   case $opt in 
+	-d) shift; DB=$1; shift;;
+	 *) echo "I don't know what $opt is..."; exit 2;;
+   esac
+
+done
+
+echo "
+
+set feedback off serveroutput on 
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS'; 
+
+col owner format a15
+col segment_name format a40
+col numobjs format 999999
+col mb format 99999999.99
+
+compute sum of mb on report
+break on report
+
+ select *
+   from dba_tablespaces
+  where tablespace_name = upper('$tablespace');
+
+col numfiles format 9999
+
+col file_name format a100
+
+col file_mb format 999,999,999
+col used_mb format 999,999,999
+col free_mb format 999,999,999
+col free_pct format 999999.99
+
+col unalloc_mb format 999,999,999
+
+col MBmaxTOT format 999,999,999
+
+col SEGMAX format 999,999,999
+col NEXTMAX format 999,999,999
+col largest_nextext_m format 999,999,999
+col largest_freeseg_m format 999,999,999
+
+exec dbms_output.put_line('TABLESPACE                                             CURRENT SPACE USED                                POTENTIAL SPACE USED');
+exec dbms_output.put_line('======================================= ================================================= =================================================');
+
+select u.ts ts_name
+	, numfiles
+--
+	, round(a.mbcurtot,2) file_mb
+	, round(u.mbused,2) used_mb
+	, round(f.mbfree,2) free_mb
+	, round(100 * f.mbfree / a.mbcurtot,2) free_pct
+--
+	, round(u.mbused + f.mbfree + a.mbunalloc,2) file_mb
+	, round(u.mbused,2) used_mb
+	, round(f.mbfree + a.mbunalloc,2) free_mb
+	, round(100*(f.mbfree + a.mbunalloc) / (u.mbused + f.mbfree + a.mbunalloc),4) free_pct
+--	, round(a.mbunalloc,2) unalloc_mb
+	--
+	, segmax
+	, largest_nextext_m
+	, largest_freeseg_m
+from
+	(select tablespace_name ts
+		, sum(bytes)/1024/1024 mbfree
+		, max(bytes)/1024/1024 largest_freeseg_m
+	   from dba_free_space
+	  where tablespace_name = upper('$tablespace')
+	  group by tablespace_name) f,
+	(select tablespace_name ts
+		, sum(bytes)/1024/1024 mbused
+		, max(bytes/1024/1024) segmax
+		, max(next_extent/1024/1024) largest_nextext_m
+	   from dba_segments
+	  where tablespace_name = upper('$tablespace')
+	  group by tablespace_name) u,
+	(select tablespace_name ts
+		, count(1) numfiles
+		, sum(decode(autoextensible,'NO',bytes,maxbytes)-bytes)/1024/1024 mbunalloc
+		, sum(bytes)/1024/1024 mbcurtot
+	   from dba_data_files
+	  where tablespace_name = upper('$tablespace')
+	  group by tablespace_name) a
+  where a.ts = f.ts (+)
+    and a.ts = u.ts (+);
+
+ select tablespace_name ts
+	, file_name
+	, bytes/1024/1024 current_mb
+	, decode(autoextensible,'NO',bytes,maxbytes)/1024/1024 potential_mb
+   from dba_data_files
+  where tablespace_name = upper('$tablespace');
+
+ select owner, segment_type, count(1) numobjs, sum(bytes)/1024/1024 mb
+   from dba_segments
+  where tablespace_name = upper('$tablespace')
+  group by owner, segment_type
+  order by owner, segment_type;
+
+
+" | sqlplus -s $SYSCONN@$DB
+
+

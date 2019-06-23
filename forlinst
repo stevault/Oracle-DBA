@@ -1,0 +1,12 @@
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameter(s)"
+   exit 1
+fi
+
+for LocalInst in $LOCALSIDS
+do
+   . oraset $LocalInst -q
+   $*
+   [ $? -ne 0 ] && exit
+done

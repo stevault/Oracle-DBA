@@ -1,0 +1,115 @@
+DB=$ORACLE_SID
+
+BSNAP=""
+ESNAP=""
+BDATE=""
+EDATE=""
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+         -d) DB=$1; shift ;;
+      -snap) ESNAP=$1; BSNAP=$ESNAP-1; shift;;
+     -bsnap) BSNAP=$1; shift;;
+     -esnap) ESNAP=$1; shift;;
+     -bdate) BDATE=$1; shift;;
+     -edate) EDATE=$1; shift;;
+          *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+if [ ! -z "$BSNAP"  -a -z "$BDATE" ]; then
+
+  echo "
+
+  set pagesize 0 feedback off
+
+ select max(to_char(begin_interval_time,'DD-MON-YYYY HH24:MI:SS')) bdate 
+   from dba_hist_snapshot
+  where snap_id = $BSNAP;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB | read BDATE
+
+fi
+
+if [ ! -z "$ESNAP"  -a -z "$EDATE" ]; then
+
+  echo "
+
+  set pagesize 0 feedback off
+
+ select max(to_char(end_interval_time,'DD-MON-YYYY HH24:MI:SS')) edate 
+   from dba_hist_snapshot
+  where snap_id = $ESNAP;
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB | read EDATE
+
+fi
+
+if [ ! -z "$BDATE"  -a -z "$BSNAP" ]; then
+
+  echo "
+
+  set pagesize 0 feedback off
+
+  alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+ select max(snap_id) bstat 
+   from dba_hist_snapshot
+  where begin_interval_time <= '$BDATE';
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB | read BSNAP
+
+fi
+
+if [ ! -z "$EDATE"  -a -z "$ESNAP" ]; then
+
+  echo "
+
+  set pagesize 0 feedback off
+
+  alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+ select min(snap_id) bstat 
+   from dba_hist_snapshot
+  where end_interval_time >= '$EDATE';
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB | read ESNAP
+
+fi
+
+
+
+######################################################
+echo BDATE $BDATE 
+echo EDATE $EDATE 
+echo BSNAP $BSNAP 
+echo ESNAP $ESNAP
+######################################################
+
+echo "
+
+with bstat as ( select a.*, b.begin_interval_time  from dba_hist_waitstat a, dba_hist_snapshot b where a.instance_number = b.instance_number and a.snap_id = b.snap_id and b.snap_id = $BSNAP)
+   , estat as ( select a.*, b.begin_interval_time  from dba_hist_waitstat a, dba_hist_snapshot b where a.instance_number = b.instance_number and a.snap_id = b.snap_id and b.snap_id = $ESNAP)
+ select estat.class
+	, estat.instance_number
+	, estat.time , bstat.time
+	, estat.wait_count, bstat.wait_count 
+	, estat.time - bstat.time delta_time
+	, estat.wait_count- bstat.wait_count delta_count
+   from estat, bstat
+  where estat.class= bstat.class
+    and estat.instance_number = bstat.instance_number
+/
+
+" | sqlplus -s $SYSCONN@$DB
+
+

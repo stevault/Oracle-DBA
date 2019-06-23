@@ -1,0 +1,63 @@
+ORIGINAL_COMMAND_LINE="$0 $*"
+DB=$ORACLE_SID
+
+###############################################################################
+while [ $# -ge 1 ]; do
+
+  opt=$1
+  shift
+
+  case $opt in
+      -d) DB=$1; shift ;;
+-refresh) REFRESH=Y; REFSEC=$1; shift ;;
+       *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+if [ "$REFRESH" = "Y" ]; then
+
+ while :
+ do
+
+   clear
+   NEW_COMMAND_LINE=`echo "$ORIGINAL_COMMAND_LINE" | sed 's;-refresh [0-9]*;;'`
+   $NEW_COMMAND_LINE
+   sleep $REFSEC
+
+ done
+
+fi
+
+
+###############################################################################
+
+sp_show_sga () {
+
+echo "
+
+set pagesize 900 feedback off
+
+col pga_mb format 99999.99
+col pga_max_mb format 99999.99
+
+compute sum of pga_mb on report
+compute sum of pga_max_mb on report
+break on report
+
+select to_char(sysdate,'HH:MI:SS') curtime,
+	sid
+	, sum(case when statistic# = 37 then value else 0 end)/1024/1024 pga_mb
+	, sum(case when statistic# = 38 then value else 0 end)/1024/1024 pga_max_mb
+from ( select * from v\$sesstat
+	 where statistic# in (37,38))
+group by sid
+order by pga_max_mb
+/
+"| sqlplus -s $SYSCONN@$DB
+
+}
+
+
+
+sp_show_sga | tail -20

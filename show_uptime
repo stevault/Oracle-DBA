@@ -1,8 +1,5 @@
 DB=$ORACLE_SID
 
-SYN=$1
-shift
-
 ######################################################
 
 while [ $# -ge 1 ];do
@@ -19,15 +16,12 @@ done
 
 ######################################################
 
-
-
 echo "
 
-col owner format a15
-col db_link format a15
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 
-select * from dba_synonyms 
-where synonym_name = upper('$SYN');
+select *
+from v\$instance
+;
 
- 
-" | sqlplus -s $SYSCONN@$DB
+" | sqlplus -s ${SYSCONN}@$DB

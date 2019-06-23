@@ -1,0 +1,66 @@
+DB=$ORACLE_SID
+TABLE_CLAUSE="1=1"
+START_DATE="SYSDATE-30"
+MIGR_DATE="'08-JUN-2019'"
+SORT_COL="full_diff"
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+        -d) DB=$1; shift ;;
+ -onetable) TABLE_CLAUSE="mview_name = '$1'"; shift ;;
+    -sort) SORT_COL="$1"; shift ;;
+-startdate) START_DATE="'$1'"; shift ;;
+     -opts) sh_show_opts ; exit 0 ;;
+         *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+col pre_full format 999999
+col post_full format 999999
+col full_diff format 99999.99
+col pre_incr format 9999.99
+col post_incr format 9999.99
+col incr_diff format 999.99
+
+with pre_ventiv as (
+select owner, mview_name
+, avg(FULLREFRESHTIM) avg_full
+, avg(INCREFRESHTIM) avg_incr 
+ from awdba.dbv_mview_analysis
+where last_refresh_date < $MIGR_DATE
+and last_refresh_date > $START_DATE
+  and $TABLE_CLAUSE
+group by owner, mview_name
+),
+post_ventiv as (
+select owner, mview_name
+, avg(FULLREFRESHTIM) avg_full
+, avg(INCREFRESHTIM) avg_incr 
+ from awdba.dbv_mview_analysis
+where last_refresh_date > $MIGR_DATE
+  and $TABLE_CLAUSE
+group by owner, mview_name
+)
+select pre_ventiv.mview_name
+--
+	, pre_ventiv.avg_full pre_full, post_ventiv.avg_full post_full
+	, post_ventiv.avg_full - pre_ventiv.avg_full full_diff
+--
+	, pre_ventiv.avg_incr pre_incr, post_ventiv.avg_incr post_incr
+	, post_ventiv.avg_incr - pre_ventiv.avg_incr incr_diff
+--
+from pre_ventiv, post_ventiv
+where pre_ventiv.mview_name = post_ventiv.mview_name
+order by $SORT_COL
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

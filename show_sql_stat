@@ -1,0 +1,59 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+
+DAYS=3
+
+if [ $# -lt 1 ]; then
+   echo "Missing parameters:  sql_id"
+   echo "SYNTAX:  $0 <sql_id> [ -days <numdayshist> | $DAYS ] [ -d <database> | ORACLE_SID ]"
+   exit 2
+fi 
+
+SQL_ID=$1
+shift 
+
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -days) DAYS=$1 ; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+set pagesize 900
+
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS'; 
+
+col avg_sec format 9999999
+col tot_sec format 9999999
+col iowait format 9999999
+col clwait format 9999999
+col apwait format 9999999
+col ccwait format 9999999
+
+select s.snap_id, cast(s.begin_interval_time as date) snaptime, s.instance_number, sql_id, plan_hash_value
+	, executions_delta
+	, elapsed_time_delta/100000 tot_sec
+, IOWAIT_DELTA/100000 iowait
+, CLWAIT_DELTA/100000 clwait
+, APWAIT_DELTA/100000 apwait
+, CCWAIT_DELTA/100000 ccwait
+	, elapsed_time_delta/(case when executions_delta = 0 then 99999999999999 else executions_delta end)/100000 avg_sec
+ from dba_hist_sqlstat ss, dba_hist_snapshot s
+where ss.sql_id = '$SQL_ID'
+and ss.snap_id = s.snap_id
+and ss.instance_number = s.instance_number
+and s.begin_interval_time > sysdate-$DAYS
+order by s.instance_number, s.snap_id
+/
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

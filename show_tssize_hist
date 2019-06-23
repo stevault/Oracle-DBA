@@ -1,0 +1,146 @@
+#!/bin/ksh
+
+DB=$ORACLE_SID
+FREQUENCY=QUARTERLY
+SCOPE=YEAR
+TSFilter="1=1"
+DBFilter="1=1"
+
+. /cloudsfs1/jenkins/OracleEnv.h 
+
+
+###########################################
+while [ $# -ge 1 ]; do
+
+   opt=$1
+
+   case $opt in 
+	 -d) shift; DBFilter="db_name = upper('$1')"; shift;;
+	 -f)  shift; FREQUENCY=$1; shift;;
+	 -s)  shift; SCOPE=$1; shift;;
+	-ts)  shift; TSFilter="tablespace.tsname = upper('$1')"; shift ;;
+	  *) echo "idk what $opt is." ; exit 2;;
+   esac
+
+done
+
+###########################################
+
+case $SCOPE in 
+	  2YR)	DateRange="s.begin_interval_time >= trunc(sysdate)-(365*2)" ;;
+	 YEAR)	DateRange="s.begin_interval_time >= trunc(sysdate)-365" ;;
+	MONTH)	DateRange="s.begin_interval_time >= trunc(sysdate,'MONTH')-30" ;;
+	 WEEK)	DateRange="s.begin_interval_time >= trunc(sysdate-7)" ;;
+	    *) echo "IDK what $SCOPE is, in the context of snapshot frequency"; exit 2;;
+esac
+
+WEEKLY=" 
+ select trunc(s.begin_interval_time) - to_number(to_char(s.begin_interval_time,'D')) + 1 rpt_dte, i.db_name, i.dbid
+	, min(s.snap_id) sample_snap_id, min(s.begin_interval_time) sample_date 
+   from dba_hist_snapshot s , dba_hist_database_instance i 
+  where i.instance_number = 1 
+    and s.dbid = i.dbid 
+    and s.startup_time = i.startup_time 
+    and $DateRange
+  group by trunc(s.begin_interval_time) - to_number(to_char(s.begin_interval_time,'D')) + 1 , i.db_name, i.dbid
+"
+
+MONTHLY="
+ select trunc(s.begin_interval_time,'MONTH') rpt_dte, i.db_name, i.dbid
+	, min(s.snap_id) sample_snap_id, min(s.begin_interval_time) sample_date 
+   from dba_hist_snapshot s , dba_hist_database_instance i 
+  where i.instance_number = 1 
+    and s.dbid = i.dbid 
+    and s.startup_time = i.startup_time 
+    and $DateRange
+  group by trunc(s.begin_interval_time,'MONTH'), i.db_name, i.dbid
+"
+
+QUARTERLY="
+ select trunc(s.begin_interval_time,'Q') rpt_dte, i.db_name, i.dbid
+	, min(s.snap_id) sample_snap_id, min(s.begin_interval_time) sample_date 
+   from dba_hist_snapshot s , dba_hist_database_instance i 
+  where i.instance_number = 1 
+    and s.dbid = i.dbid 
+    and s.startup_time = i.startup_time 
+    and $DateRange
+  group by trunc(s.begin_interval_time,'Q'), i.db_name, i.dbid
+"
+
+DAILY="
+ select trunc(s.begin_interval_time) rpt_dte, i.db_name, i.dbid
+	, min(s.snap_id) sample_snap_id, min(s.begin_interval_time) sample_date 
+   from dba_hist_snapshot s , dba_hist_database_instance i 
+  where i.instance_number = 1 
+    and s.dbid = i.dbid 
+    and s.startup_time = i.startup_time 
+    and $DateRange
+  group by trunc(s.begin_interval_time), i.db_name, i.dbid
+"
+
+case $FREQUENCY in 
+          DAILY) DateFilter=$DAILY ;;
+         WEEKLY) DateFilter=$WEEKLY ;;
+        MONTHLY) DateFilter=$MONTHLY ;;
+      QUARTERLY) DateFilter=$QUARTERLY ;;
+              *) echo "IDK what $FREQUENCY is, in the context of snapshot reporting"; exit 2;;
+esac
+
+###########################################
+###########################################
+echo "
+
+col diffpct format 999.99
+
+select
+	db_name,
+	tablespace_name,
+	thedate,
+	gbsize
+   from (
+	 select thedate,
+		db_name,
+		tablespace_name,
+		gbsize
+	   from (
+		 select rownum r,
+			thedate,
+			db_name,
+			tablespace_name,
+			gbsize
+		   from (
+			 select trunc(thedate) thedate, tablespace_name,
+				db_name
+				, max(gbsize) gbsize
+			   from    
+				(
+				 select snaps.rpt_dte thedate, snaps.sample_date, snaps.db_name,
+					tablespace.tsname tablespace_name,
+					round((usage.tablespace_usedsize*block_size.value)/1024/1024/1024,2) gbsize
+				   from dba_hist_tbspc_space_usage usage,
+					dba_hist_tablespace   tablespace,
+					v\$parameter                block_size
+					, ( $DateFilter ) snaps
+			          where 1=1
+				    and usage.tablespace_id = tablespace.ts#
+				    and usage.dbid = tablespace.dbid
+				    and block_size.name     = 'db_block_size'
+				    and snaps.dbid = usage.dbid
+				    and snaps.sample_snap_id = usage.snap_id
+				    and $TSFilter
+				    and $DBFilter
+				)
+			 group by
+				db_name,
+				tablespace_name,
+				trunc(thedate)
+			 order by
+				db_name,
+				tablespace_name,
+				trunc(thedate)
+ )
+ )
+ );
+
+" | sqlplus -s ${SYSCONN}@awrwh
+

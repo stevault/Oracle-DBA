@@ -1,0 +1,100 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+col dbname format a20
+
+SELECT
+    gname,
+    dbname,
+    file_type,
+    round(SUM(space)/1024/1024) used_mb,
+    round(SUM(space)/1024/1024/1024) used_gb,
+    COUNT(*) NUMFILES
+FROM
+    (
+        SELECT
+            gname,
+            regexp_substr(full_alias_path, '[[:alnum:]_]*',1,4) dbname,
+            file_type,
+            space,
+            aname,
+            system_created,
+            alias_directory
+        FROM
+            (
+                SELECT
+                    concat('+'||gname, sys_connect_by_path(aname, '/')) full_alias_path,
+                    system_created,
+                    alias_directory,
+                    file_type,
+                    space,
+                    level,
+                    gname,
+                    aname
+                FROM
+                    (
+                        SELECT
+                            b.name            gname,
+                            a.parent_index    pindex,
+                            a.name            aname,
+                            a.reference_index rindex ,
+                            a.system_created,
+                            a.alias_directory,
+                            c.type file_type,
+                            c.space
+                        FROM
+                            v\$asm_alias a,
+                            v\$asm_diskgroup b,
+                            v\$asm_file c
+                        WHERE
+                            a.group_number = b.group_number
+                        AND a.group_number = c.group_number(+)
+                        AND a.file_number = c.file_number(+)
+                        AND a.file_incarnation = c.incarnation(+) ) START WITH (mod(pindex, power(2, 24))) = 0
+                AND rindex IN
+                    (
+                        SELECT
+                            a.reference_index
+                        FROM
+                            v\$asm_alias a,
+                            v\$asm_diskgroup b
+                        WHERE
+                            a.group_number = b.group_number
+                        AND (
+                                mod(a.parent_index, power(2, 24))) = 0
+                            --and a.name like '%PRD%'
+                    ) CONNECT BY prior rindex = pindex )
+        WHERE
+            NOT file_type IS NULL
+            and system_created = 'Y' )
+WHERE
+    1=1
+--upper(dbname) like '%_PRD%'
+GROUP BY
+    gname,
+    dbname,
+    file_type
+ORDER BY
+    gname,
+    dbname,
+    file_type
+/
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

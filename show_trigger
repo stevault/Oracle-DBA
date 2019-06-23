@@ -79,6 +79,7 @@ set long 99999
   where trigger_name $OPERATOR upper('$TRIGGER')
 order by owner, trigger_name;
 
+
 " |  $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
 
 fi

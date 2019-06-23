@@ -1,0 +1,60 @@
+DB=$ORACLE_SID
+SOURCEFILE=/var/tmp/srcpriv$$.tmp
+TARGETFILE=/var/tmp/tgtpriv$$.tmp
+
+rm -f $SOURCEFILE $TARGETFILE
+
+if [ $# -lt 5 ]; then
+   echo "ERROR: missing parameter(s)."
+   echo "SYNTAX: $0 <username> -sdb <sourcedb> -tdb <targetdb>"
+   exit 2
+fi
+
+USR=$1 
+shift
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+  case $opt in
+     -sdb) SDB=$1; shift ;;
+     -tdb) TDB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+echo "
+
+set serveroutput on pagesize 0 feedback off linesize 200
+
+ select ' grant ' || privilege || ' on ' || owner  || '.' || table_name || ' to ' || grantee || ';'
+   from dba_tab_privs
+  where upper(grantee) = upper('$USR');
+
+ select ' grant ' || granted_role || ' to ' || grantee || ';'
+   from dba_role_privs
+  where upper(grantee) = upper('$USR');
+
+" | sqlplus -s ${SYSCONN}@$SDB | tee $SOURCEFILE
+
+ls -l $SOURCEFILE
+
+echo "
+
+set serveroutput on pagesize 0 feedback off linesize 200
+
+ select ' grant ' || privilege || ' on ' || owner  || '.' || table_name || ' to ' || grantee || ';'
+   from dba_tab_privs
+  where upper(grantee) = upper('$USR');
+
+ select ' grant ' || granted_role || ' to ' || grantee || ';'
+   from dba_role_privs
+  where upper(grantee) = upper('$USR');
+
+" | sqlplus -s ${SYSCONN}@$TDB | tee $TARGETFILE
+
+ls -l $TARGETFILE
+
+diff $SOURCEFILE $TARGETFILE

@@ -1,0 +1,10 @@
+
+echo -e "
+
+set pages 0 feedback off 
+select value from v\$parameter where name = 'background_dump_dest';
+
+" | sqlplus -s awdba/awdba 
+
+
+

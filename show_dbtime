@@ -3,7 +3,6 @@ DBTIME_STATID=3649082374
 TIMEFRAME_CLAUSE="to_char(bs.begin_interval_time,'HH24:MI:SS') < to_char(sysdate,'HH24:MI:SS')"
 WEEKDAY_CLAUSE="1=1"
 
-
 ######################################################
 
 while [ $# -ge 1 ];do

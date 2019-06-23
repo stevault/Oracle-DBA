@@ -1,0 +1,52 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+
+#OPTSB#####################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+echo "
+
+set pagesize 900
+
+select
+ sql_id,
+ ss.SNAP_ID,
+ s.begin_interval_time,
+ ss.INSTANCE_NUMBER,
+ ss.PLAN_HASH_VALUE,
+ ss.OPTIMIZER_COST,
+ ss.OPTIMIZER_MODE,
+ ss.OPTIMIZER_ENV_HASH_VALUE,
+ ss.SHARABLE_MEM,
+ ss.LOADED_VERSIONS,
+ ss.VERSION_COUNT,
+ ss.MODULE
+  from dba_hist_sqlstat ss, dba_hist_snapshot s
+ where 1=1
+   and ss.snap_id = s.snap_id
+   and sql_id in
+	(select a.sql_id
+	   from dba_hist_sqlstat a, dba_hist_snapshot asnap, dba_hist_sqlstat b
+	  where asnap.begin_interval_time > sysdate -1
+	    and a.snap_id = asnap.snap_id
+	    and b.snap_id = a.snap_id - 96
+	    and a.sql_id = b.sql_id
+	    and a.plan_hash_value != b.plan_hash_value)
+order by sql_id, snap_id 
+/
+
+
+" | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

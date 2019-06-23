@@ -1,0 +1,42 @@
+DB=$ORACLE_SID
+
+######################################################
+
+while [ $# -ge 1 ];do
+
+  opt=$1
+  shift
+
+  case $opt in
+     -d) DB=$1; shift ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+######################################################
+
+
+echo "
+
+col mb format 9999999.99
+
+break on wk skip 1 on report
+
+compute sum of mb on wk 
+compute sum of mb on report
+
+ select to_char(first_time,'IW') wk, to_char(trunc(first_time),'DY') dy
+	, trunc(first_time) dte
+	, sum(blocks*block_size)/1024/1024 mb
+  from v\$archived_log
+ where first_time > sysdate-42
+ and thread# = 1
+  group by 
+	to_char(first_time,'IW') , to_char(trunc(first_time),'DY') 
+  	, trunc(first_time) 
+  order by trunc(first_time)
+/
+
+" | sqlplus -s $SYSCONN@$DB
+
