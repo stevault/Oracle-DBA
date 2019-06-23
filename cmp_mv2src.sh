@@ -38,7 +38,7 @@ set lines 200 pages 60
 	   and i.table_name = '$SRC_NAME'
 	 order by ic.table_name, ic.index_name, ic.column_position;
 
-" | sqlplus -s awdba/awdba@$SRC_SID
+" | sqlplus -s $SYSCONN@$SRC_SID
 
 echo "  select ic.table_name, ic.index_name, ic.column_name
 	  from dba_ind_columns ic, dba_indexes i
@@ -47,7 +47,7 @@ echo "  select ic.table_name, ic.index_name, ic.column_name
 	   and i.table_owner = '$MV_OWNER'
 	   and i.table_name = '$MV_NAME';
 
-" | sqlplus -s awdba/awdba@$ORACLE_SID
+" | sqlplus -s $SYSCONN@$ORACLE_SID
 
 
 

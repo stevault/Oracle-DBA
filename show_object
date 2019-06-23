@@ -47,7 +47,7 @@ col edition_name format a10
   where object_name $OPERATOR upper('$OBJECT')
 order by object_name, owner, object_type ;
 
-" |  $ORACLE_HOME/bin/sqlplus -s awdba/awdba@$DB
+" |  $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
 
 
 exit

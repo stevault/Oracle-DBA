@@ -32,7 +32,7 @@ select sysdate cur_date_time,
   WHERE 1=0
 /
 
-" | sqlplus -s awdba/awdba@$DB
+" | sqlplus -s $SYSCONN@$DB
 
 } 
 
@@ -51,7 +51,7 @@ commit;
 
 select min(sample_time), max(sample_time) from ash_$CURTIME ;
 
-" | sqlplus -s awdba/awdba@$DB
+" | sqlplus -s $SYSCONN@$DB
 
 }
 

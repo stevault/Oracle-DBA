@@ -65,7 +65,7 @@ order by owner, trigger_name;
   where trigger_name $OPERATOR upper('$TRIGGER')
 order by owner, trigger_name;
 
-" |  $ORACLE_HOME/bin/sqlplus -s awdba/awdba@$DB
+" |  $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
 
 if [ "$OPERATOR" = "=" ]; then
 

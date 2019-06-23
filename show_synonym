@@ -29,4 +29,4 @@ col db_link format a15
 select * from dba_synonyms 
 where synonym_name = upper('$SYN');
 
-" | sqlplus -s awdba/awdba@$DB
+" | sqlplus -s $SYSCONN@$DB
