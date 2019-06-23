@@ -24,6 +24,7 @@ echo "
 whenever sqlerror exit sql.sqlcode
 set pages 500 lines 200 feedback off
 col next format a20
+col name format a60
 
 alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 

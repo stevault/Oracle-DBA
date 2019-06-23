@@ -6,6 +6,7 @@ DB=$ORACLE_SID
 ######################################################
 
 # SYNTAX:  $0 [ -source SOURCE_TABLE ] [ -snapshot MATERIALIZED_VIEW ] [ -fix | -showfix ]"
+# DIFFTYPE:  -difftype [ id_diff | type_diff | len_diff | prec_diff | scale_diff | null_diff ]
 
 TMPDIR=/var/tmp
 BASE=`basename $0`
@@ -14,6 +15,7 @@ MATVIEW_CLAUSE="1=1"
 SHOWFIX=N
 FIX=N
 TMPFILE=$TMPDIR/${BASE}_$$.tmp
+DIFFTYPE="'Y' = 'Y'"
 
 ######################################################
 
@@ -26,6 +28,7 @@ while [ $# -ge 1 ];do
           -d) DB=$1; shift ;;
      -source) SOURCETABLE_CLAUSE="source_table = '$1'"; shift ;;
    -snapshot) MATVIEW_CLAUSE="snapshot = '$1'"; shift ;;
+   -difftype) DIFFTYPE="$1 = 'Y'"; shift ;;
         -fix) FIX=Y;;
     -showfix) SHOWFIX=Y;;
            *) echo "I don't know what $opt is...\n" ; exit 2;;
@@ -39,12 +42,26 @@ show_report () {
 
 echo "
 
-set lines 150 feedback off
+set lines 180 feedback off
 
 col snapshot format a40
 col source_table format a40
 col mv_type format a20
 col src_type format a20
+
+break on source_table skip 1
+
+ttitle \"columns where COLUMN is missing \"
+ select SNAPSHOT, SOURCE_TABLE, SRC_ID, COLUMN_NAME
+	, SRC_TYPE, SRC_LEN, SRC_PREC, SRC_SCALE, SRC_NULL 
+   from wh_St.awdba_mv_compare
+  where COL_MISSING = 'Y'
+    and $SOURCETABLE_CLAUSE
+    and source_table = (select distinct source_table from wh_st.awdba_mv_compare where $MATVIEW_CLAUSE)
+    and $DIFFTYPE
+  order by source_table, src_id
+/
+
 
 ttitle \"columns where COLUMN ID is different\"
  select SNAPSHOT, SOURCE_TABLE, COLUMN_NAME                    
@@ -53,6 +70,9 @@ ttitle \"columns where COLUMN ID is different\"
   where ID_DIFF = 'Y'
     and $SOURCETABLE_CLAUSE
     and $MATVIEW_CLAUSE
+    and $DIFFTYPE
+    and col_missing != 'Y'
+  order by snapshot, src_id
 /
 
 
@@ -63,6 +83,9 @@ ttitle \"columns where DATA TYPE is different\"
   where TYPE_DIFF = 'Y'
     and $SOURCETABLE_CLAUSE
     and $MATVIEW_CLAUSE
+    and $DIFFTYPE
+    and col_missing != 'Y'
+  order by snapshot, src_id
 /
 
 
@@ -73,6 +96,9 @@ ttitle \"columns where LENGTH OF FIELD is different\"
   where LEN_DIFF = 'Y'
     and $SOURCETABLE_CLAUSE
     and $MATVIEW_CLAUSE
+    and $DIFFTYPE
+    and col_missing != 'Y'
+  order by snapshot, src_id
 /
 
 
@@ -83,6 +109,9 @@ ttitle \"columns where PRECISION OF FIELD is different\"
   where PREC_DIFF = 'Y'
     and $SOURCETABLE_CLAUSE
     and $MATVIEW_CLAUSE
+    and $DIFFTYPE
+    and col_missing != 'Y'
+  order by snapshot, src_id
 /
 
 
@@ -93,6 +122,9 @@ ttitle \"columns where SCALE OF FIELD is different\"
   where SCALE_DIFF = 'Y'
     and $SOURCETABLE_CLAUSE
     and $MATVIEW_CLAUSE
+    and $DIFFTYPE
+    and col_missing != 'Y'
+  order by snapshot, src_id
 /
 
 
@@ -103,6 +135,9 @@ ttitle \"columns where NULL designation is different\"
   where NULL_DIFF = 'Y'
     and $SOURCETABLE_CLAUSE
     and $MATVIEW_CLAUSE
+    and $DIFFTYPE
+    and col_missing != 'Y'
+  order by snapshot, src_id
 /
 
 " | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 
@@ -122,6 +157,15 @@ set pagesize 0 linesize 150 trimspool on verify off feedback off
   where PREC_DIFF = 'Y'
     and $SOURCETABLE_CLAUSE
     and $MATVIEW_CLAUSE
+    and $DIFFTYPE
+/
+
+ select distinct 'exec dbms_mview.refresh(''' || snapshot || '');'
+   from wh_St.awdba_mv_compare
+  where PREC_DIFF = 'Y'
+    and $SOURCETABLE_CLAUSE
+    and $MATVIEW_CLAUSE
+    and $DIFFTYPE
 /
 
 " | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB 

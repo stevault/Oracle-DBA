@@ -55,6 +55,9 @@ if [ $EXPLAIN = 'Y' ]; then
   echo "Explaining statement."
 
 echo "
+
+alter session set \"_WITH_SUBQUERY\" = MATERIALIZE;
+
   explain plan for
 	 $SQLTEXT
 /

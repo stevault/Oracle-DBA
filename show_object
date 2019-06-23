@@ -40,7 +40,7 @@ col edition_name format a10
  --DATA_OBJECT_ID,
  OBJECT_TYPE,
  CREATED,
- LAST_DDL_TIME,
+ to_char(LAST_DDL_TIME,'DD-MON-YYYY HH24:MI:SS') last_ddl_time,
  --TIMESTAMP,
  STATUS
    from dba_objects
@@ -61,6 +61,7 @@ exit
  CREATED                                                                                                                 DATE
  LAST_DDL_TIME                                                                                                           DATE
  TIMESTAMP                                                                                                               VARCHAR2(19)
+ STATUS                                                                                                                  VARCHAR2(7)
  TEMPORARY                                                                                                               VARCHAR2(1)
  GENERATED                                                                                                               VARCHAR2(1)
  SECONDARY                                                                                                               VARCHAR2(1)

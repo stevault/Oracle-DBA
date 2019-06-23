@@ -43,6 +43,7 @@ alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 col owner format a20
 col segment_type format a20
 col segment_name format a40
+col partition_name format a40
 
 col numobjs format 999999
 col mb format 99999999.99

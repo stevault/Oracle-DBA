@@ -33,11 +33,14 @@ execute DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'PRETT
 
 col x for a25000
 
-select dbms_metadata.get_ddl('MATERIALIZED_VIEW','$MV_NAME','WH_ST') x from dual;
+select dbms_metadata.get_ddl('MATERIALIZED_VIEW','$MV_NAME','$MV_OWNER') x from dual;
 
 " | sqlplus -s '/ as sysdba' >> $BACKUPFILE
 
 retcode=$?
+[ $retcode -ne 0 ] && exit 1
+
+BackupObjIdx.sh $MV_OWNER $MV_NAME -mv >> $BACKUPFILE
 
 ls -l $BACKUPFILE
 

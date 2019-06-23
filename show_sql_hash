@@ -1,7 +1,7 @@
 DB=$ORACLE_SID
 . /home/oracle/awdba/.sh_common
 
-sqlid="ban0r446hp8zh"
+sqlid="$1"
 
 if [ $# -lt 1 ]; then
     echo "Missing sql-id"
@@ -28,25 +28,39 @@ done
 #OPTSE#####################################################
 echo "
 
+col begin_interval_time format a40
+col first_awr format a40
+col last_awr format a40
+col optimizer_cost format 99999999999999999
 set pagesize 900
 
-select
- ss.SNAP_ID,
- s.begin_interval_time,
- ss.INSTANCE_NUMBER,
- ss.PLAN_HASH_VALUE,
- ss.OPTIMIZER_COST,
- ss.OPTIMIZER_MODE,
- ss.OPTIMIZER_ENV_HASH_VALUE,
- ss.SHARABLE_MEM,
- ss.LOADED_VERSIONS,
- ss.VERSION_COUNT,
- ss.MODULE
-from dba_hist_sqlstat ss, dba_hist_snapshot s
-where 1=1
-  and ss.snap_id = s.snap_id
-  and sql_id = '$sql_id'
-order by snap_id
+alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
+
+prompt AWR snapshot history
+ select
+	s.instance_number,
+	ss.sql_id, ss.PLAN_HASH_VALUE
+	, sum(executions_delta) executions
+	, avg(ss.OPTIMIZER_COST) optimizer_cost
+	, min(s.begin_interval_time) first_AWR
+	, max(s.end_interval_time) last_AWR
+   from dba_hist_sqlstat ss, dba_hist_snapshot s
+  where 1=1
+    and ss.snap_id = s.snap_id
+    and sql_id = '$sql_id'
+  group by s.instance_number, ss.sql_id, ss.plan_hash_value
+	
+  order by first_AWR asc
+/
+
+prompt Current sql SHARED POOL
+ select sql_id, plan_hash_value
+	, OPTIMIZER_COST
+	, last_load_time
+	, HASH_VALUE
+	, OLD_HASH_VALUE
+  from v\$sqlarea 
+ where sql_id = '$sql_id'
 /
 
 

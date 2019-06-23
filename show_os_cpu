@@ -1,4 +1,5 @@
 DB=$ORACLE_SID
+TIMECLAUSE="1=1"
 . /home/oracle/awdba/.sh_common
 #OPTSB#####################################################
 
@@ -8,15 +9,25 @@ while [ $# -ge 1 ];do
   shift
 
   case $opt in
-     -d) DB=$1; shift ;;
-  -opts) sh_show_opts ; exit 0 ;;
-      *) echo "I don't know what $opt is...\n" ; exit 2;;
+   -daysago) TIMECLAUSE="trunc(begin_interval_time) > trunc(sysdate)-$1"
+		shift;;
+   -fortime) TIMECLAUSE="begin_interval_time >= trunc(sysdate)-($1)"
+		shift;;
+     -since) TIMECLAUSE="begin_interval_time >= to_date('$1','YYYYMMDDHH24MI')"
+		shift;;
+ -timerange) TIMECLAUSE="begin_interval_time >= to_date('$1','YYYYMMDDHH24MI') and end_interval_time <= to_date('$2','YYYYMMDDHH24MI')"
+		shift; shift;;
+         -d) DB=$1 shift ;;
+      -opts) sh_show_opts ; exit 0 ;;
+          *) echo "I don't know what $opt is...\n" ; exit 2;;
   esac
 
 done
 
 #OPTSE#####################################################
 echo "
+
+set pagesize 400
 
 col load format 999.99
 col ldf format a100
@@ -25,6 +36,7 @@ col snap_day format a10
 break on snap_day nodup
 
 select 
+	instance_Number,
 	snap_id,
 	snap_day,
 	snap_start,
@@ -32,19 +44,32 @@ select
 	elap_min,
 	load,
 	lpad(' ',load,'*') ldf
+,	busy_time
+,	idle_time 
    from (
  select to_char(s.begin_interval_time,'HH24:MI:SS') snap_start
 	, to_char(s.end_interval_time,'HH24:MI:SS') snap_stop
  	, to_char(s.begin_interval_time,'Day') snap_day
-	, o.snap_id
+	, o.snap_id, o.dbid, o.instance_number
  	, (24*60) * to_number(cast(s.end_interval_time as date) - cast(s.begin_interval_time as date)) elap_min
+	--
 	, sum(case when stat_name = 'LOAD' then value end) load
-   from dba_hist_osstat o, dba_hist_snapshot s
+	, sum(case when stat_name = 'BUSY_TIME' then value end) BUSY_TIME
+	, sum(case when stat_name = 'IDLE_TIME' then value end) IDLE_TIME
+	, sum(case when stat_name = 'BUSY_TIME' then value end) 
+	+ sum(case when stat_name = 'IDLE_TIME' then value end) CAPACITY
+   from dba_hist_osstat o
+	, dba_hist_snapshot s
+	, v\$instance i
   where o.SNAP_ID = s.SNAP_ID
     and o.DBID = s.DBID
     and o.INSTANCE_NUMBER = s.INSTANCE_NUMBER
+    and i.instance_number = s.instance_number
+--
+    and $TIMECLAUSE
+--
   group by 
-	s.begin_interval_time , s.end_interval_time , o.snap_id
+	s.begin_interval_time , s.end_interval_time , o.snap_id, o.dbid, o.instance_number
   order by o.snap_id
 )
 /

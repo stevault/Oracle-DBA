@@ -37,7 +37,7 @@ show_table $OBJECT -d $DB
 echo "
 
 col owner format a10
-col query format a140
+col query format a200
 col name format a25
 col master_owner format a10
 col master format a25
@@ -61,6 +61,10 @@ set long 4999
   where name = upper('$OBJECT');
 
 desc wh_st.$OBJECT
+
+select *
+from dba_registered_mviews
+where name = upper('$OBJECT');
 
 " | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
 

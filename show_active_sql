@@ -93,21 +93,21 @@ set feedback off
 col INSTANCE_1 format a120
 col INSTANCE_2 format a120
 
- select 'alter system kill session ''' || sid || ',' || serial# || ''';' INSTANCE_1
+ select 'alter system kill session ''' || sid || ',' || serial# || ',@' || inst_id || ''';'
    from gv\$session s
   where '$KILL' = 'Y'
-    and inst_id = 1
+--    and inst_id = 1
     and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
     and s.status != 'INACTIVE'
 /
 
- select 'alter system kill session ''' || sid || ',' || serial# || ''';' INSTANCE_2
+ select 'alter system kill session ''' || sid || ',' || serial# || ',@' || INSTANCE_2 || ''';'
    from gv\$session s
   where '$KILL' = 'Y'
     and inst_id = 2
     and (sysdate - s.sql_exec_start) > $THRESHSEC/(24*60*60)
     and s.status != 'INACTIVE'
-/
+
 
 
 " | sqlplus -s $SYSCONN@$DB

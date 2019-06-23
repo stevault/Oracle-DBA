@@ -36,8 +36,8 @@ show database verbose $STANDBY
 
 show configuration verbose
 
-" | $ORACLE_HOME/bin/dgmgrl $SYSCONN@$DB
 
+" | $ORACLE_HOME/bin/dgmgrl $SYSCONN@$DB 
 
 if [ $? -ne 0 ]; then
    echo "The data guard configuration check failed for $PRIMARY"

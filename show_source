@@ -44,12 +44,12 @@ echo "
 col text format a200
 set lines 250 pages 9999 feedback off
 
- select line, text
+ select type, line, text
    from dba_errors
   where name = upper('$OBJECT')
     and $OWNERCLAUSE
     and $TYPECLAUSE
-  order by sequence;
+  order by type, sequence;
 
 " | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
 
@@ -61,12 +61,12 @@ echo "
 col text format a200 
 set lines 250 pages 9999 feedback off
 
- select decode('$SHOWERROR','Y',line,'') l, text
+ select decode('$SHOWERROR','Y',line,'') l, type, text
    from dba_Source
   where name = upper('$OBJECT')
     and $OWNERCLAUSE
     and $TYPECLAUSE
-  order by line;
+  order by type, line;
 
 " | $ORACLE_HOME/bin/sqlplus -s $SYSCONN@$DB
 
@@ -76,6 +76,8 @@ echo "+===================================================================="
 Show_source
 echo "+===================================================================="
 if [ $SHOWERROR = Y ]; then
+   echo ERRORS 
+   echo --------------
    Show_error
 fi
 echo "+===================================================================="

@@ -21,12 +21,16 @@ echo -e "===================================================================="
  
 cd $DIR
  
-du -x 2>/dev/null  | tail -1 | read TOT dir
+du -x --summarize 2>/dev/null | read TOT dir
+
+if [ $TOT -lt 100 ]; then
+ du --summarize 2>/dev/null | read TOT dir
+fi
 let TOT=$TOT/2/1024
  
 for i in `ls`
 do
-  du -x $i 2>/dev/null | tail -1
+  du -x --summarize $i 2>/dev/null
 done | sort -n | grep -v '^0' | while read spc dir
 do
    let spc=$spc/2/1024
@@ -59,8 +63,12 @@ echo -e $PU | sed 's;%;;g' | read FSPctUsed
  
 i=0
  
-echo -e "[\c"
+if [ $FSPctUsed -lt 0 ]; then
+   echo ugh
+else
  
+echo -e "[\c"
+
 while [ $i -lt 100 ]; do
    let i=i+1
    [ $i -le $FSPctUsed ] && echo -e "X\c" || echo -e ".\c"
@@ -68,3 +76,4 @@ done
  
 echo -e "]\n"
 
+fi

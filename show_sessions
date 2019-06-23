@@ -1,5 +1,6 @@
 
 DB=$ORACLE_SID
+FILTER="1=1"
 
 ##################################################################################
 while [ $# -ge 1 ]; do
@@ -8,9 +9,10 @@ while [ $# -ge 1 ]; do
   shift
 
   case $opt in
-     -d) DB=$1; shift ;;
-    -eq) OPERATOR=$1; shift ;;
-      *) echo "I don't know what $opt is...\n" ; exit 2;;
+      -d) DB=$1; shift ;;
+     -eq) OPERATOR=$1; shift ;;
+ -filter) FILTER="$1"; shift ;;
+       *) echo "I don't know what $opt is...\n" ; exit 2;;
   esac
 
 done
@@ -20,6 +22,7 @@ done
 
 echo "
 
+set feedback off
 alter session set nls_date_format = 'DD-MON-YYYY HH24:MI:SS';
 set feedback 10
 
@@ -34,8 +37,6 @@ col username format a18
 col schemaname format a18
 col process format a8
 
-prompt ALL RUNNING SQL
-
 select  inst_id, USERNAME,
  SID,
  SERIAL#,
@@ -45,7 +46,9 @@ select  inst_id, USERNAME,
  PROGRAM, 
  STATUS,
   logon_time
+,sql_exec_start
    from gv\$session
+  where $FILTER
   order by logon_time
 /
 

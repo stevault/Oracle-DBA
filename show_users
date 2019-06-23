@@ -1,16 +1,23 @@
+DB=$ORACLE_SID
+. /home/oracle/awdba/.sh_common
+#OPTSB#####################################################
 
+while [ $# -ge 1 ];do
 
-if [ $# -lt 1 ]; then
-echo Missing Parameters.
-echo "SYNTAX:  $0 <oracle sid>"
-exit 1
-fi
+  opt=$1
+  shift
 
-export SID=$1
-USR=sys
-echo $SID  | grep -i '^ca'
-[ $? -ne 0 ] && PWD=gupta2oo9 || PWD=gupta2o14
-CONN=${USR}/${PWD}@${SID}
+  case $opt in
+     -d) DB=$1; shift ;;
+  -opts) sh_show_opts ; exit 0 ;;
+      *) echo "I don't know what $opt is...\n" ; exit 2;;
+  esac
+
+done
+
+#OPTSE#####################################################
+
+CONN=$SYSCONN@$DB
 
 $ORACLE_HOME/bin/sqlplus -s "$CONN as sysdba" << EOF
 
@@ -18,7 +25,7 @@ whenever sqlerror exit sql.sqlcode
 
 set lines 200 pages 0 feedback off verify off define off
 
- select '$SID' || ',' ||  username || ',' ||  created || ',' || account_status
+ select '$DB' || ',' ||  username || ',' ||  created || ',' || account_status
    from dba_users
   where username not in ('SYS','SYSTEM')
     and account_status not in ('LOCKED','EXPIRED & LOCKED')
